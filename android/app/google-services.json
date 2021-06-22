@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "887199091024",
+    "project_id": "remotedigitalkeyring",
+    "storage_bucket": "remotedigitalkeyring.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887199091024:android:becbd450e16b8ae7c0c455",
+        "android_client_info": {
+          "package_name": "quantic.digitalkeyholder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "887199091024-dc9que9hmq60djlmjte4116c3cs0u1j7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "quantic.digitalkeyholder",
+            "certificate_hash": "45fe0d3eb8590e88020cd477a549782641601dab"
+          }
+        },
+        {
+          "client_id": "887199091024-1c5di1c3fqeq4lmdpnjsnv2tfohq9256.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH2bi24xZh_aCqIKx0xHeHi76sY09RyU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "887199091024-1c5di1c3fqeq4lmdpnjsnv2tfohq9256.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

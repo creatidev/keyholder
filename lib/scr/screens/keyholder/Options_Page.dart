@@ -13,12 +13,12 @@ class _OptionsPageState extends State<OptionsPage> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.all(20),
-        color: Colors.deepPurpleAccent,
-        height: 600,
+        //color: Colors.deepPurpleAccent,
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
-            Center(child: Icon(Icons.pie_chart, size: 64.0, color: Colors.blue)),
-            Center(child: Icon(Icons.pie_chart, size: 64.0, color: Colors.blue)),
+            Image.asset('assets/logo_footer.png', width: 150)
           ],
         ),
       ),

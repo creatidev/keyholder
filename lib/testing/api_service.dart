@@ -17,9 +17,11 @@ class APIService with ChangeNotifier {
   String _selectedStatus = "2";
   final prefs = new UserPreferences();
   APIService() {
-    this.getRequestedActions(_selectedStatus);
-    //print(_listActions!.first.name);
-    print("Api consultada");
+    if (prefs.userId != '0') {
+      this.getRequestedActions(_selectedStatus);
+    }
+
+    print("Api iniciada...");
   }
 
   bool get isLoading => this._isLoading;
@@ -53,7 +55,7 @@ class APIService with ChangeNotifier {
     notifyListeners();
   }
 
- Future<UserResponse> login(LoginRequestModel requestModel) async {
+  Future<UserResponse> login(LoginRequestModel requestModel) async {
     String? url = '$_urlMain/user_login';
     final response = await http.post(Uri.parse(url),
         body: requestModel.toJson(), headers: {'X-API-KEY': _apiKey});
@@ -62,9 +64,7 @@ class APIService with ChangeNotifier {
       print(response.statusCode);
       print(response.body + '***');
 
-        return UserResponse.fromJson(json.decode(response.body));
-
-
+      return UserResponse.fromJson(json.decode(response.body));
     } else {
       throw Exception('No se pudieron cargar los datos');
     }
@@ -115,6 +115,31 @@ class APIService with ChangeNotifier {
       var decodedInfo = utf8.decode(base64.decode(data['information']));
       print(json.decode(decodedInfo));
       return StatusDataModel.fromJson(json.decode(decodedInfo));
+    } else {
+      throw Exception('No se pudieron cargar los datos');
+    }
+  }
+
+  Future<StatusDataModel> restorePassword(String email) async {
+    String? url = '$_urlMain/restore_password';
+    final response = await http.post(Uri.parse(url),
+        body: {'email': email}, headers: {'X-API-KEY': _apiKey});
+    print(response.body);
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      return StatusDataModel.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('No se pudieron cargar los datos');
+    }
+  }
+
+  Future<StatusDataModel> changePassword(String password) async {
+    String? url = '$_urlMain/change_password';
+    final response = await http.post(Uri.parse(url),
+        body: {'user_id': prefs.userId, 'password': password},
+        headers: {'X-API-KEY': _apiKey});
+    print(response.body);
+    if (response.statusCode == 200 || response.statusCode == 400) {
+      return StatusDataModel.fromJson(json.decode(response.body));
     } else {
       throw Exception('No se pudieron cargar los datos');
     }

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/services/MainNotifier.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+
+final prefs = new UserPreferences();
 
 class PushNotificationService {
   static FirebaseMessaging messaging = FirebaseMessaging.instance;

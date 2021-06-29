@@ -77,7 +77,7 @@ class Keycode extends Model {
   String? ip;
   String? user;
   String? password;
-  int? port;
+  dynamic port;
   String? instance;
   String? regDate;
   int? action;

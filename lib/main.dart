@@ -5,7 +5,7 @@ import 'package:digitalkeyholder/scr/screens/authenticate/Sign_In_Page.dart';
 import 'package:digitalkeyholder/scr/screens/authenticate/Sign_Up_Page.dart';
 import 'package:digitalkeyholder/scr/screens/keyholder/Mainview_Page.dart';
 import 'package:digitalkeyholder/scr/services/push_notification_service.dart';
-import 'package:digitalkeyholder/scr/services/MainNotifier.dart';
+import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
 import 'package:digitalkeyholder/testing/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -31,7 +31,7 @@ void main() async {
 void configLoading() {
   EasyLoading.instance
     ..displayDuration = const Duration(milliseconds: 2000)
-    ..indicatorType = EasyLoadingIndicatorType.threeBounce
+    ..indicatorType = EasyLoadingIndicatorType.pouringHourGlass
     ..loadingStyle = EasyLoadingStyle.custom
     ..indicatorSize = 45.0
     ..radius = 10.0
@@ -63,8 +63,8 @@ class _KeyHolderState extends State<KeyHolder> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(providers: [
-      ChangeNotifierProvider<ThemeBloc>(
-          create: (_) => ThemeBloc(CustomTheme().lightTheme())),
+      ChangeNotifierProvider<ThemeNotifier>(
+          create: (_) => ThemeNotifier()),
       ChangeNotifierProvider(create: (_) => new CounterProvider()),
       ChangeNotifierProvider(create: (_) => new APIService()),
     ], child: MyApp());
@@ -113,11 +113,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final currentTheme = Provider.of<ThemeBloc>(context).getThemeData();
+    final theme = Provider.of<ThemeNotifier>(context);
     return MaterialApp(
       builder: EasyLoading.init(),
       title: 'Llavero',
-      theme: currentTheme,
+      theme: theme.darkTheme ? dark : light,
       home: Wrapper(),
       //initialRoute: initialRoute,
       navigatorKey: navigatorKey, // Navegar
@@ -134,9 +134,11 @@ class Wrapper extends StatelessWidget {
   final prefs = new UserPreferences();
   @override
   Widget build(BuildContext context) {
+    //var theme = Provider.of<ThemeBloc>(context);
     print(prefs.userId);
+
     //Devuelve la página inicial o de login
-    if (prefs.userId == 'none') {
+    if (prefs.userId == '0') {
       return SignInPage();
     } else {
       return MainView();

@@ -261,7 +261,7 @@ class _SignUpPageState extends State<SignUpPage> {
 }
 
 Widget widgetFooter(Color texcolor) {
-  return FooterLogin(
+  return Footer(
     logo: 'assets/logo_footer.png',
     text: 'Powered by',
     textColor: texcolor,

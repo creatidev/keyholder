@@ -24,7 +24,7 @@ class _CustomFloatingActionButtonState
     return Neumorphic(
       style: NeumorphicStyle(
           surfaceIntensity: 0.7,
-          depth: 5,
+          depth: 2,
           boxShape: NeumorphicBoxShape.roundRect(BorderRadius.circular(0.0)),
           shape: NeumorphicShape.flat,
           lightSource: LightSource.left,

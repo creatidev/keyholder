@@ -1,9 +1,11 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
+import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
+import 'package:provider/provider.dart';
 import 'CategoryDetails_Page.dart';
 
 class RegisteredCategoriesPage extends StatefulWidget {
@@ -18,7 +20,8 @@ class RegisteredCategoriesPage extends StatefulWidget {
   final Color? shadowColor;
 
   @override
-  _RegisteredCategoriesPageState createState() => _RegisteredCategoriesPageState();
+  _RegisteredCategoriesPageState createState() =>
+      _RegisteredCategoriesPageState();
 }
 
 class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
@@ -31,11 +34,13 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
   Categories? categoryModel;
   int categoryCount = 0;
 
-
   Future<List<Categories>> getRegisteredCategories() async {
+    final counter = Provider.of<CounterProvider>(context);
+
     var data = dbService!.getCategory();
     await data.then((value) {
       categoryCount = value.length;
+      counter.onChangeCats(categoryCount);
     });
     return data;
   }
@@ -63,47 +68,6 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.97,
-                            child: Table(
-                              columnWidths: {
-                                0: FlexColumnWidth(5),
-                                1: FlexColumnWidth(90)
-                              },
-                              children: [
-                                TableRow(children: [
-                                  Icon(Icons.label),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Categorías registradas: $categoryCount',
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w900,
-                                              color: widget.textColor),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ]),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(),
                     DataTable(
                       showCheckboxColumn: false,
                       columns: [
@@ -113,7 +77,7 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w900,
-                                color: widget.textColor),
+                                color: widget.iconColor),
                           ),
                         ),
                         DataColumn(
@@ -122,7 +86,7 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w900,
-                                color: widget.textColor),
+                                color: widget.iconColor),
                           ),
                         ),
                         DataColumn(
@@ -131,7 +95,7 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                             style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: widget.textColor),
+                                color: widget.iconColor),
                           ),
                         ),
                       ],
@@ -143,10 +107,6 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 CategoryDetails(
-                                                  textColor: widget.textColor,
-                                                  iconColor: widget.iconColor,
-                                                  shadowColor:
-                                                      widget.shadowColor,
                                                   categoryModel: data,
                                                 )));
                                   },
@@ -173,7 +133,10 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                                           children: <Widget>[
                                             IconButton(
                                               padding: EdgeInsets.all(0),
-                                              icon: Icon(Icons.clear),
+                                              icon: Icon(
+                                                Icons.clear,
+                                                color: widget.iconColor,
+                                              ),
                                               onPressed: () {
                                                 FormHelper.showMessage(
                                                   context,

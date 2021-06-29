@@ -10,7 +10,7 @@ import 'package:digitalkeyholder/scr/screens/keyholder/Mainview_Page.dart';
 import 'package:digitalkeyholder/scr/screens/Progress.dart';
 import 'package:digitalkeyholder/scr/screens/widgets/PasswordField.dart';
 import 'package:digitalkeyholder/scr/services/push_notification_service.dart';
-import 'package:digitalkeyholder/scr/services/MainNotifier.dart';
+import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
 import 'package:digitalkeyholder/testing/api_service.dart';
 import 'package:digitalkeyholder/testing/login_model.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +58,7 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget Uibuild(BuildContext context) {
-    var theme = Provider.of<ThemeBloc>(context);
+    var theme = Provider.of<ThemeNotifier>(context);
     langWords = LangWords();
     return SafeArea(
       child: Scaffold(
@@ -77,10 +77,7 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    Theme.of(context).brightness.toString().toLowerCase() ==
-                            'brightness.light'
-                        ? theme.setThemeData(CustomTheme().darkTheme())
-                        : theme.setThemeData(CustomTheme().lightTheme());
+                    theme.toggleTheme();
                   },
                   child: Container(
                     width: 220,
@@ -161,7 +158,7 @@ class _SignInPageState extends State<SignInPage> {
                           name: "email",
                           onSaved: (input) => loginRequestModel!.email = input,
                           decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.verified_user_outlined,
+                              prefixIcon: Icon(Icons.alternate_email,
                                   color: Colors.deepPurpleAccent, size: 18),
                               labelText: "Correo electrónico"),
                           validator: FormBuilderValidators.compose([
@@ -196,7 +193,11 @@ class _SignInPageState extends State<SignInPage> {
                                 child: NeumorphicText(
                                     langWords!.recoverPassword! + "\n",
                                     style: NeumorphicStyle(
-                                        color: _colors.textColor(context)),
+                                        color: _colors.textColor(context),
+                                        depth: 2,
+                                        intensity: 0.7,
+                                        shadowLightColor:
+                                            _colors.shadowColor(context)),
                                     textStyle: NeumorphicTextStyle(
                                       decoration: TextDecoration.underline,
                                       fontWeight: FontWeight.bold,
@@ -245,12 +246,16 @@ class _SignInPageState extends State<SignInPage> {
                         apiService.login(loginRequestModel!).then((value) {
                           setState(() {
                             print(value.message);
-
                             EasyLoading.dismiss();
                           });
-
                           if (value.message == 'Sesión iniciada') {
-                            prefs.userId = value.user!.idUsuario!;
+                            prefs.userId = value.user!.id.toString();
+                            prefs.userName = value.user!.name!;
+                            prefs.lastName = value.user!.lastname!;
+                            prefs.email = value.user!.email!;
+                            prefs.phone = value.user!.cellphone.toString();
+                            //prefs.alias = value.user!.usuAlias!;
+
                             final snackBar =
                                 SnackBar(content: Text(value.message!));
                             ScaffoldMessenger.of(context)
@@ -271,22 +276,22 @@ class _SignInPageState extends State<SignInPage> {
                     },
                     tooltip: langWords!.login,
                     style: NeumorphicStyle(
-                        color: _colors.iconsColor(context),
+                        color: _colors.contextColor(context),
                         shape: NeumorphicShape.flat,
                         //boxShape: NeumorphicBoxShape.circle(),
                         shadowLightColor: _colors.shadowColor(context),
-                        depth: 3,
-                        intensity: 3),
+                        depth: 2,
+                        intensity: 1),
                     //padding: const EdgeInsets.all(15.0),
                     child: Icon(
                       Icons.login,
                       color: _colors.textColor(context),
                       size: 30,
                     )),
-
               ],
             ),
           ),
+          /*
           GestureDetector(
             child: Padding(
                 padding: const EdgeInsets.all(45.0),
@@ -296,13 +301,18 @@ class _SignInPageState extends State<SignInPage> {
                     NeumorphicText(
                       langWords!.notAccount! + ' ',
                       style: NeumorphicStyle(
-                        color: Color(0xFFA35FFF),
-                      ),
+                          color: Color(0xFFA35FFF),
+                          depth: 2,
+                          intensity: 0.7,
+                          shadowLightColor: Colors.deepPurple),
                     ),
                     NeumorphicText(
                       langWords!.signUp!,
                       style: NeumorphicStyle(
                         color: _colors.textColor(context),
+                        depth: 2,
+                        intensity: 0.7,
+                        shadowLightColor: _colors.shadowColor(context),
                       ),
                       textStyle: NeumorphicTextStyle(
                         decoration: TextDecoration.underline,
@@ -331,6 +341,7 @@ class _SignInPageState extends State<SignInPage> {
                       )));
             },
           ),
+           */
         ],
       ),
     );
@@ -338,7 +349,7 @@ class _SignInPageState extends State<SignInPage> {
 }
 
 Widget widgetFooter(Color texcolor) {
-  return FooterLogin(
+  return Footer(
     logo: 'assets/logo_footer.png',
     text: 'Powered by',
     textColor: texcolor,

@@ -4,7 +4,7 @@ Widget CustomFloationButton(
     String heroTag, String labelText, Function onPressed, Color buttonColor) {
   return FloatingActionButton.extended(
     heroTag: heroTag,
-    onPressed: onPressed!(),
+    onPressed: onPressed(),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(0.0),
     ),

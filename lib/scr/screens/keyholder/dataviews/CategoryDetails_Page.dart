@@ -1,4 +1,5 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
+import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
 import 'package:digitalkeyholder/scr/screens/keyholder/AddEditKeycode_Page.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
@@ -9,18 +10,12 @@ import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'KeycodeDetails_Page.dart';
 
 class CategoryDetails extends StatefulWidget {
-  const CategoryDetails(
-      {Key? key,
-      required this.categoryModel,
-      required this.textColor,
-      required this.iconColor,
-      required this.shadowColor})
-      : super(key: key);
+  const CategoryDetails({
+    Key? key,
+    required this.categoryModel,
+  }) : super(key: key);
 
   final Categories? categoryModel;
-  final Color? textColor;
-  final Color? iconColor;
-  final Color? shadowColor;
   @override
   _CategoryDetailsState createState() => _CategoryDetailsState();
 }
@@ -38,6 +33,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
 
   @override
   Widget build(BuildContext context) {
+    CustomColors _colors = new CustomColors();
     var langWords = LangWords();
     return Scaffold(
       body: SafeArea(
@@ -50,6 +46,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
+                      padding: EdgeInsets.only(top: 10),
                       width: MediaQuery.of(context).size.width * 0.97,
                       child: Table(
                         columnWidths: {
@@ -58,7 +55,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                         },
                         children: [
                           TableRow(children: [
-                            Icon(Icons.label),
+                            Icon(Icons.label, color: _colors.iconsColor(context),),
                             Padding(
                               padding: const EdgeInsets.all(2.0),
                               child: Row(
@@ -70,7 +67,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: widget.textColor),
+                                        color: _colors.textColor(context)),
                                   ),
                                 ],
                               ),
@@ -86,12 +83,12 @@ class _CategoryDetailsState extends State<CategoryDetails> {
               Container(
                 padding: EdgeInsets.all(20),
                 child: Table(
-                  border: TableBorder.all(color: Colors.black),
+                  border: TableBorder.all(color: Colors.black12),
                   children: [
-                    TableRow(children: [
+                    /*TableRow(children: [
                       Text('Key'),
                       Text('Value'),
-                    ]),
+                    ]),*/
                     TableRow(children: [
                       Text('Id de categoría:'),
                       Text(widget.categoryModel!.id.toString()),
@@ -105,7 +102,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
               ),
               Container(
                   //color: Colors.deepPurpleAccent,
-                  height: MediaQuery.of(context).size.height,
+                  height: MediaQuery.of(context).size.height * 0.80,
                   width: MediaQuery.of(context).size.width,
                   child: FutureBuilder<List<Keycode>>(
                     future: dbService!.getKeycodeByCategory(
@@ -127,7 +124,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: widget.textColor),
+                                        color: _colors.textColor(context)),
                                   ),
                                 ],
                               ),
@@ -142,7 +139,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                   style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
-                                      color: widget.textColor),
+                                      color: _colors.textColor(context)),
                                 )),
                                 DataColumn(
                                   label: Text(
@@ -150,7 +147,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: widget.textColor),
+                                        color: _colors.textColor(context)),
                                   ),
                                 ),
                                 DataColumn(
@@ -159,7 +156,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: widget.textColor),
+                                        color: _colors.textColor(context)),
                                   ),
                                 ),
                               ],
@@ -171,12 +168,6 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                                 MaterialPageRoute(
                                                     builder: (context) =>
                                                         KeycodeDetails(
-                                                          iconColor:
-                                                              widget.iconColor,
-                                                          textColor:
-                                                              widget.textColor,
-                                                          shadowColor: widget
-                                                              .shadowColor,
                                                           keycodeModel: data,
                                                         )));
                                           },
@@ -193,7 +184,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                                     IconButton(
                                                       padding:
                                                           EdgeInsets.all(0),
-                                                      icon: Icon(Icons.edit),
+                                                      icon: Icon(Icons.edit, color: _colors.iconsColor(context),),
                                                       onPressed: () {
                                                         Navigator.push(context,
                                                             MaterialPageRoute<
@@ -201,15 +192,10 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                                           builder: (BuildContext
                                                               context) {
                                                             return AddEditKeycodePage(
-                                                              textColor: widget
-                                                                  .textColor,
-                                                              iconColor: widget
-                                                                  .iconColor,
-                                                              shadowColor: widget
-                                                                  .shadowColor,
                                                               keycodeModel:
                                                                   data,
-                                                              isCreateMode: false,
+                                                              isCreateMode:
+                                                                  false,
                                                               isEditMode: true,
                                                               isAutoMode: false,
                                                             );
@@ -226,7 +212,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                                     IconButton(
                                                       padding:
                                                           EdgeInsets.all(0),
-                                                      icon: Icon(Icons.clear),
+                                                      icon: Icon(Icons.clear, color: _colors.iconsColor(context),),
                                                       onPressed: () {
                                                         FormHelper.showMessage(
                                                           context,
@@ -281,19 +267,19 @@ class _CategoryDetailsState extends State<CategoryDetails> {
           children: <Widget>[
             NeumorphicFloatingActionButton(
               style: NeumorphicStyle(
-                  color: widget.iconColor,
+                  color: _colors.contextColor(context),
                   shape: NeumorphicShape.flat,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: widget.textColor,
-                  depth: 3,
-                  intensity: 3),
+                  shadowLightColor: _colors.textColor(context),
+                  depth: 2,
+                  intensity: 1),
               tooltip: langWords.cancel,
               child: Container(
                 margin: EdgeInsets.all(2),
                 child: Icon(
                   Icons.cancel,
-                  color: widget.textColor,
+                  color: _colors.textColor(context),
                   size: 30,
                 ),
               ),
@@ -303,19 +289,19 @@ class _CategoryDetailsState extends State<CategoryDetails> {
             ),
             NeumorphicFloatingActionButton(
               style: NeumorphicStyle(
-                  color: widget.iconColor,
+                  color: _colors.contextColor(context),
                   shape: NeumorphicShape.flat,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: widget.textColor,
-                  depth: 3,
-                  intensity: 3),
+                  shadowLightColor: _colors.textColor(context),
+                  depth: 2,
+                  intensity: 1),
               tooltip: langWords.addCategory,
               child: Container(
                 margin: EdgeInsets.all(2),
                 child: Icon(
                   Icons.add_circle,
-                  color: widget.textColor,
+                  color: _colors.textColor(context),
                   size: 30,
                 ),
               ),
@@ -323,9 +309,6 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                 Navigator.of(context)
                     .push(MaterialPageRoute(
                         builder: (context) => AddEditKeycodePage(
-                              textColor: widget.textColor,
-                              iconColor: widget.iconColor,
-                              shadowColor: widget.shadowColor,
                               categoryModel: widget.categoryModel,
                               isEditMode: false,
                               isAutoMode: false,

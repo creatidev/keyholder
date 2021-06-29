@@ -53,7 +53,8 @@ class LangWords {
       this.hintLoginPassword = 'Contraseña',
       this.recoverPassword = '¿Olvidó su contraseña?',
       this.messageRecoverPassword =
-          'Para recuperar la contraseña, ingrese el correo electrónico y presione enviar correo electrónico, recibirá un correo electrónico para que pueda actualizar su contraseña. Solo disponible para cuentas creadas con nombre de usuario y contraseña.',
+          'Para cambiar la contraseña, ingrese el correo electrónico y presione enviar solicitud de cambio de contraseña, recibirá un correo'
+              ' electrónico con una nueva contraseña, que puede cambiar internamente en la aplicación.',
       this.hintLoginUser = 'Nombre de usuario o correo electrónico',
       this.messageRepeatPassword = 'Repetir contraseña',
       this.requestChangePassword = 'Enviar solicitud de cambio de contraseña',

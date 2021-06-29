@@ -1,29 +1,27 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
+import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
 import 'package:digitalkeyholder/scr/screens/keyholder/AddEditKeycode_Page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
+import 'package:scratcher/scratcher.dart';
 
 class KeycodeDetails extends StatefulWidget {
-  const KeycodeDetails(
-      {Key? key,
-      required this.keycodeModel,
-      required this.textColor,
-      required this.iconColor,
-      required this.shadowColor})
-      : super(key: key);
-  final Color? iconColor;
-  final Color? textColor;
+  const KeycodeDetails({
+    Key? key,
+    required this.keycodeModel,
+  }) : super(key: key);
+
   final Keycode? keycodeModel;
-  final Color? shadowColor;
   @override
   _KeycodeDetailsState createState() => _KeycodeDetailsState();
 }
 
 class _KeycodeDetailsState extends State<KeycodeDetails> {
-  Color? _colorChain = Colors.transparent;
-  bool _obscure = true;
+  CustomColors _colors = new CustomColors();
+  bool _isEdited = false;
+  bool _obscure = false;
   @override
   Widget build(BuildContext context) {
     var langWords = LangWords();
@@ -58,7 +56,7 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: widget.textColor),
+                                        color: _colors.textColor(context)),
                                   ),
                                 ],
                               ),
@@ -76,16 +74,16 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                 child: Table(
                   border: TableBorder.all(color: Colors.black12),
                   children: [
-                    TableRow(children: [
+                    /*TableRow(children: [
                       Text('Key'),
                       Text('Value'),
-                    ]),
+                    ]),*/
                     TableRow(children: [
                       Text('Id de llave :'),
                       Text(widget.keycodeModel!.id.toString()),
                     ]),
                     TableRow(children: [
-                      Text('Categoria :'),
+                      Text('Categoría :'),
                       Text(widget.keycodeModel!.name.toString()),
                     ]),
                     TableRow(children: [
@@ -100,14 +98,14 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                       Text('Usuario :'),
                       Text(
                         widget.keycodeModel!.user!,
-                        style: TextStyle(color: _colorChain),
+                        style: TextStyle(color: _colors.iconsColor(context)),
                       ),
                     ]),
                     TableRow(children: [
                       Text('Contraseña :'),
                       Text(
                         widget.keycodeModel!.password!,
-                        style: TextStyle(color: _colorChain),
+                        style: TextStyle(color: _colors.iconsColor(context)),
                       ),
                     ]),
                     TableRow(children: [
@@ -138,34 +136,34 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                     onPressed: () {
                       setState(() {
                         _obscure = !_obscure;
-                        _colorChain = _obscure
-                            ? Colors.transparent
-                            : Colors.lightBlueAccent;
                       });
                     },
                     tooltip: langWords.showPassword,
                     style: NeumorphicStyle(
-                        color: widget.iconColor,
+                        color: _colors.contextColor(context),
                         shape: NeumorphicShape.flat,
                         boxShape: NeumorphicBoxShape.circle(),
-                        shadowLightColor: widget.shadowColor,
-                        depth: 3,
-                        intensity: 3),
+                        shadowLightColor: _colors.iconsColor(context),
+                        depth: 2,
+                        intensity: 1),
                     padding: const EdgeInsets.all(7.0),
-                    child: Icon(
-                      Icons.remove_red_eye_rounded,
-                      color: widget.textColor,
-                      size: 25,
-                    ),
+                    child: _obscure
+                        ? Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: _colors.textColor(context),
+                            size: 25,
+                          )
+                        : Icon(
+                            Icons.remove_red_eye_rounded,
+                            color: _colors.textColor(context),
+                            size: 25,
+                          ),
                   ),
                   NeumorphicButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute<String>(
+                      Navigator.push(context, MaterialPageRoute<Keycode>(
                         builder: (BuildContext context) {
                           return AddEditKeycodePage(
-                            textColor: widget.textColor,
-                            iconColor: widget.iconColor,
-                            shadowColor: widget.shadowColor,
                             keycodeModel: widget.keycodeModel,
                             isCreateMode: false,
                             isEditMode: true,
@@ -175,6 +173,7 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                       )).then((result) {
                         if (result != null) {
                           setState(() {
+                            _isEdited = true;
                             super.widget;
                           });
                         }
@@ -182,21 +181,55 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                     },
                     tooltip: langWords.save,
                     style: NeumorphicStyle(
-                        color: widget.iconColor,
+                        color: _colors.contextColor(context),
                         shape: NeumorphicShape.flat,
                         boxShape: NeumorphicBoxShape.circle(),
-                        shadowLightColor: widget.shadowColor,
-                        depth: 3,
-                        intensity: 3),
+                        shadowLightColor: _colors.shadowColor(context),
+                        depth: 2,
+                        intensity: 1),
                     padding: const EdgeInsets.all(7.0),
                     child: Icon(
                       Icons.edit,
-                      color: widget.textColor,
+                      color: _colors.textColor(context),
                       size: 25,
                     ),
                   ),
                 ],
               ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Visibility(
+                      visible: _obscure,
+                      child: Scratcher(
+                        color: _colors.iconsColor(context),
+                        child: Container(
+                          //color: Colors.black,
+                          height: 80,
+                          width: 200,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.keycodeModel!.user!,
+                                style: TextStyle(
+                                    color: _colors.textColor(context)),
+                              ),
+                              Text(
+                                widget.keycodeModel!.password!,
+                                style: TextStyle(
+                                    color: _colors.textColor(context)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
         ),
@@ -209,24 +242,24 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
           children: <Widget>[
             NeumorphicFloatingActionButton(
               style: NeumorphicStyle(
-                  color: widget.iconColor,
+                  color: _colors.contextColor(context),
                   shape: NeumorphicShape.flat,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: widget.shadowColor,
-                  depth: 3,
-                  intensity: 3),
+                  shadowLightColor: _colors.shadowColor(context),
+                  depth: 2,
+                  intensity: 1),
               tooltip: langWords.cancel,
               child: Container(
                 margin: EdgeInsets.all(2),
                 child: Icon(
                   Icons.cancel,
-                  color: widget.textColor,
+                  color: _colors.textColor(context),
                   size: 30,
                 ),
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context, _isEdited);
               },
             ),
           ],

@@ -17,38 +17,41 @@ class UserRequestList extends StatefulWidget {
     this.textColor,
     this.iconColor,
     this.shadowColor,
-    required this.requirementStatus,
+    required this.status,
+    required this.demoMode,
   }) : super(key: key);
   final Color? textColor;
   final Color? iconColor;
   final Color? shadowColor;
-  final int? requirementStatus;
+  final bool? status;
+  final bool? demoMode;
+
+  //final
   @override
   _UserRequestListState createState() => _UserRequestListState();
 }
 
 class _UserRequestListState extends State<UserRequestList> {
   int? requirementStatus;
-  bool? _status;
-  var actionId;
+  bool? _statusId;
+  var _actionId;
+  //bool? demoMode = false;
   CancelDataModel? cancelDataModel;
   String? jsonCategories;
   int keyCount = 0;
   CustomColors _colors = new CustomColors();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    if (widget.requirementStatus != null) {
-      requirementStatus = widget.requirementStatus;
-    }
   }
 
   Future setJson(Categories? categories) async {
-    actionId = categories!.actionId;
+    _actionId = categories!.actionId;
     cancelDataModel = new CancelDataModel(
-      actionid: actionId,
-      status: _status,
+      actionid: _actionId,
+      status: _statusId,
     );
     jsonCategories = jsonEncode(cancelDataModel);
   }
@@ -69,24 +72,34 @@ class _UserRequestListState extends State<UserRequestList> {
 
   @override
   Widget build(BuildContext context) {
+    String jsonDemo =
+        '{"status":true,"message":"Consulta exitosa.","actions":[{"id":0,"nombre":"Demostración","ip":"127.0.0.1","fecha_creacion":"${DateTime.now()}","estado":"generada"}]}';
+    Request? _request;
     final ScrollController _scrollController = ScrollController();
-    final request = Provider.of<APIService>(context).request;
+    //final request = Provider.of<APIService>(context).request;
+    if (widget.demoMode == true) {
+      _request = Request.fromJson(json.decode(jsonDemo));
+    } else {
+      _request = Provider.of<APIService>(context).request;
+    }
+
     return SafeArea(
         child: Scaffold(
       body: SingleChildScrollView(
         physics: ScrollPhysics(),
         child: Column(
           children: [
-            (request != null)
+            (_request != null)
                 ? Container(
                     padding: EdgeInsets.all(0),
                     child: ListView.builder(
                         controller: _scrollController,
                         shrinkWrap: true,
                         physics: BouncingScrollPhysics(),
-                        itemCount: request.actions!.length,
+                        itemCount: _request.actions!.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return _requiredKeyringCard(request.actions!, index);
+                          return _requiredKeyringCard(
+                              _request!.actions!, index);
                         }),
                   )
                 : Container(
@@ -102,6 +115,50 @@ class _UserRequestListState extends State<UserRequestList> {
   }
 
   Widget _requiredKeyringCard(List<ActionDetails> actionDetails, int index) {
+    var status = widget.status;
+    var actionStatus = actionDetails[index].status.toString();
+    IconData leadingIcon = Icons.hourglass_bottom;
+    Color leadingIconColor = _colors.iconsColor(context);
+    Color leadingShadowIconColor = _colors.shadowColor(context);
+    switch (actionStatus) {
+      case 'generada':
+        {
+          leadingIcon = Icons.hourglass_bottom;
+          leadingIconColor = _colors.iconsColor(context);
+          leadingShadowIconColor = _colors.shadowColor(context);
+        }
+        break;
+      case 'rechazada':
+        {
+          leadingIcon = Icons.stop;
+          leadingIconColor = Colors.redAccent;
+          leadingShadowIconColor = Colors.red;
+        }
+        break;
+      case 'ejecucion':
+        {
+          leadingIcon = Icons.skip_next;
+          leadingIconColor = Colors.green;
+          leadingShadowIconColor = Colors.green;
+        }
+        break;
+      case 'falla':
+        {
+          leadingIcon = Icons.error;
+          leadingIconColor = Colors.redAccent;
+          leadingShadowIconColor = Colors.red;
+        }
+        break;
+      case 'pendiente':
+        {
+          leadingIcon = Icons.pause;
+          leadingIconColor = Colors.deepOrangeAccent;
+          leadingShadowIconColor = Colors.deepOrange;
+        }
+        break;
+    }
+
+    print(actionStatus);
     var time1 = actionDetails[index].creationDate!;
     final now = DateTime.now();
     final difference = now.difference(time1);
@@ -112,23 +169,127 @@ class _UserRequestListState extends State<UserRequestList> {
     var actionName = actionDetails[index].name;
     return Card(
       child: Container(
-        padding: EdgeInsets.only(top: 10),
+        padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
               leading: Container(
-                width: 70,
-                height: 70,
-                child: Column(
+                width: 50,
+                height: 50,
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ImageIcon(
-                      AssetImage("assets/order.png"),
-                      color: _colors.textColor(context),
-                      size: 45.0,
+                    NeumorphicIcon(
+                      leadingIcon,
+                      size: 40,
+                      style: NeumorphicStyle(
+                          color: leadingIconColor,
+                          shape: NeumorphicShape.flat,
+                          boxShape: NeumorphicBoxShape.roundRect(
+                              BorderRadius.circular(10)),
+                          shadowLightColor: leadingShadowIconColor,
+                          depth: 1.5,
+                          intensity: 0.7),
                     ),
                   ],
+                ),
+              ),
+              trailing: Container(
+                width: 120,
+                height: 50,
+                child: Visibility(
+                  visible: status!,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          FormHelper.showMessage(
+                            context,
+                            "QBayes Step Up!",
+                            "¿Desea cancelar este requerimiento?",
+                            "Si",
+                            () {
+                              _statusId = false;
+                              EasyLoading.show(
+                                  status: 'Cancelando requerimiento...',
+                                  maskType: EasyLoadingMaskType.custom);
+
+                              getDataOfRequest(actId).then((value) {
+                                setJson(mapedCategories);
+                                APIService apiService = new APIService();
+                                print(jsonCategories);
+                                apiService
+                                    .sendData(jsonCategories!)
+                                    .then((value) {
+                                  setState(() => request.selectedStatus = "2");
+                                  EasyLoading.showSuccess(
+                                          "Requerimiento cancelado por el usuario.",
+                                          maskType: EasyLoadingMaskType.custom,
+                                          duration:
+                                              Duration(milliseconds: 1000))
+                                      .then((value) =>
+                                          {Navigator.of(context).pop()});
+                                });
+                              });
+                            },
+                            buttonText2: "No",
+                            isConfirmationDialog: true,
+                            onPressed2: () {
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        },
+                        child: NeumorphicIcon(
+                          Icons.stop,
+                          size: 45,
+                          style: NeumorphicStyle(
+                              color: Colors.redAccent,
+                              shape: NeumorphicShape.flat,
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(10)),
+                              shadowLightColor: Colors.red,
+                              depth: 1.5,
+                              intensity: 0.7),
+                        ),
+                      ),
+                      VerticalDivider(),
+                      GestureDetector(
+                        onTap: () {
+                          print('Siguiente');
+                          EasyLoading.show(
+                              status: 'Preparando requerimiento...',
+                              maskType: EasyLoadingMaskType.custom);
+                          getDataOfRequest(actId).then((value) {
+                            EasyLoading.dismiss();
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return KeyringBuilder(
+                                  client: actIp,
+                                  keyringIndex: index,
+                                  isAutoMode: true,
+                                  mapedCategories: mapedCategories!.toJson(),
+                                );
+                              },
+                            ));
+                          });
+                        },
+                        child: NeumorphicIcon(
+                          Icons.skip_next,
+                          size: 45,
+                          style: NeumorphicStyle(
+                              color: Colors.green,
+                              shape: NeumorphicShape.flat,
+                              boxShape: NeumorphicBoxShape.roundRect(
+                                  BorderRadius.circular(10)),
+                              shadowLightColor: Colors.lightGreen,
+                              depth: 1.5,
+                              intensity: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               title: Column(
@@ -150,12 +311,12 @@ class _UserRequestListState extends State<UserRequestList> {
                   ),
                   Row(
                     children: [
-                      Text('Cliente: ',
-                          style: TextStyle(color: _colors.textColor(context))),
+                      Text('Ip destino: ',
+                          style: TextStyle(color: _colors.iconsColor(context))),
                       Text(
                         actIp,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -166,74 +327,6 @@ class _UserRequestListState extends State<UserRequestList> {
                   ),
                 ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    FormHelper.showMessage(
-                      context,
-                      "QBayes Step Up!",
-                      "¿Desea cancelar este requerimiento?",
-                      "Si",
-                      () {
-                        _status = false;
-                        EasyLoading.show(
-                            status: 'Cancelando requerimiento...',
-                            maskType: EasyLoadingMaskType.custom);
-                        getDataOfRequest(actId).then((value) {
-                          setJson(mapedCategories);
-                          APIService apiService = new APIService();
-                          print(jsonCategories);
-                          apiService.sendData(jsonCategories!).then((value) {
-                            setState(() => request.selectedStatus = "2");
-                            EasyLoading.showSuccess(
-                                    "Requerimiento cancelado por el usuario.",
-                                    maskType: EasyLoadingMaskType.custom,
-                                    duration: Duration(milliseconds: 1000))
-                                .then((value) => {Navigator.of(context).pop()});
-                          });
-                        });
-                      },
-                      buttonText2: "No",
-                      isConfirmationDialog: true,
-                      onPressed2: () {
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  child: const Text('Siguiente'),
-                  onPressed: () {
-                    print('Siguiente');
-                    EasyLoading.show(
-                        status: 'Preparando requerimiento...',
-                        maskType: EasyLoadingMaskType.custom);
-                    getDataOfRequest(actId).then((value) {
-                      EasyLoading.dismiss();
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return KeyringBuilder(
-                            client: actIp,
-                            keyringIndex: index,
-                            isAutoMode: true,
-                            borderColor: _colors.borderColor(context),
-                            iconColor: _colors.iconsColor(context),
-                            shadowColor: _colors.shadowColor(context),
-                            textColor: _colors.textColor(context),
-                            mapedCategories: mapedCategories!.toJson(),
-                          );
-                        },
-                      ));
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
             ),
           ],
         ),

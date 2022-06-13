@@ -6,7 +6,8 @@ import 'dart:convert';
 
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
 
-WebDataModel webDataModelFromJson(String str) => WebDataModel.fromJson(json.decode(str));
+WebDataModel webDataModelFromJson(String str) =>
+    WebDataModel.fromJson(json.decode(str));
 
 String webDataModelToJson(WebDataModel data) => json.encode(data.toJson());
 
@@ -22,14 +23,14 @@ class WebDataModel {
   Categories? information;
 
   factory WebDataModel.fromJson(Map<String, dynamic> json) => WebDataModel(
-    status: json["status"],
-    message: json["message"],
-    information: Categories.fromJson(json["information"]),
-  );
+        status: json["status"],
+        message: json["message"],
+        information: Categories.fromJson(json["information"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "status": status,
-    "message": message,
-    "information": information!.toJson(),
-  };
+        "status": status,
+        "message": message,
+        "information": information!.toJson(),
+      };
 }

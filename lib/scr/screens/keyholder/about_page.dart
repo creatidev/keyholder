@@ -13,7 +13,6 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-
   PackageInfo _packageInfo = PackageInfo(
     appName: 'Unknown',
     packageName: 'Unknown',
@@ -82,7 +81,11 @@ class _AboutPageState extends State<AboutPage> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.copyright, size: 14, color: Colors.orange,),
+                      Icon(
+                        Icons.copyright,
+                        size: 14,
+                        color: Colors.orange,
+                      ),
                       NeumorphicText(
                         dotenv.get('NAME'),
                         style: NeumorphicStyle(

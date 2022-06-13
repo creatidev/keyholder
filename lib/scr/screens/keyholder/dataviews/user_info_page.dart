@@ -444,7 +444,8 @@ class _UserInfoState extends State<UserInfo> {
                             await Future.delayed(Duration(seconds: 2));
                             Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(
-                                  builder: (BuildContext context) => SignInPage(),
+                                  builder: (BuildContext context) =>
+                                      SignInPage(),
                                 ),
                                 (route) => false);
                           },
@@ -493,8 +494,7 @@ class _UserInfoState extends State<UserInfo> {
                             errorText: 'Debe contener al menos una mayúscula.'),
                         FormBuilderValidators.match(r'^(?=.*?[0-9])',
                             errorText: 'Debe contener al menos un digito.'),
-                        FormBuilderValidators.match(
-                            r'^(?=.*?[#?!@$%^&*-])',
+                        FormBuilderValidators.match(r'^(?=.*?[#?!@$%^&*-])',
                             errorText: '..al menos un caracter especial.')
                       ]),
                       labelText: 'Contraseña',
@@ -527,7 +527,7 @@ class _UserInfoState extends State<UserInfo> {
                               'Enviando solicitud de cambio de contraseña...',
                           maskType: EasyLoadingMaskType.black);
                       apiService.changePassword(_password!).then((value) {
-                        if (value.message == 'Contraseña actualizada'){
+                        if (value.message == 'Contraseña actualizada') {
                           final prefs = new UserPreferences();
                           prefs.password = _password!;
                           _newPasswordController.clear();

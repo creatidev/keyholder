@@ -5,7 +5,7 @@ class CustomColors {
   Color contextColor(BuildContext context) {
     return Theme.of(context).brightness.toString().toLowerCase() ==
             "brightness.light"
-        ? Color.fromRGBO( 255, 255, 255, 1.0 )
+        ? Color.fromRGBO(255, 255, 255, 1.0)
         : Color.fromRGBO(55, 55, 55, 0.9);
   }
 
@@ -26,7 +26,7 @@ class CustomColors {
   Color textButtonColor(BuildContext context) {
     return Theme.of(context).brightness.toString().toLowerCase() ==
             "brightness.light"
-        ? Color.fromRGBO( 255, 255, 255, 0.9019607843137255 )
+        ? Color.fromRGBO(255, 255, 255, 0.9019607843137255)
         : Color.fromRGBO(73, 17, 173, 0.9019607843137255);
   }
 
@@ -47,7 +47,7 @@ class CustomColors {
   Color borderColor(BuildContext context) {
     return Theme.of(context).brightness.toString().toLowerCase() ==
             "brightness.light"
-        ? Color.fromRGBO( 226, 161, 161, 0.7686274509803922 )
-        : Color.fromRGBO( 140, 175, 177, 0.4666666666666667 );
+        ? Color.fromRGBO(226, 161, 161, 0.7686274509803922)
+        : Color.fromRGBO(140, 175, 177, 0.4666666666666667);
   }
 }

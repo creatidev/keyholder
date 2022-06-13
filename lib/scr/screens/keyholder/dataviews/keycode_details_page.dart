@@ -49,7 +49,7 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
       _instance = widget.keycodeModel!.instance;
     }
     setTutorial();
-    if(prefs.firstViewOrEdit == true){
+    if (prefs.firstViewOrEdit == true) {
       showTutorial();
       prefs.firstViewOrEdit = false;
     }
@@ -247,7 +247,7 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "Para visualizar el usuario y la contraseña, presione este botón, ingrese su contraseña de inicio de sesión para habilitar la visualización y la edición de la llave, si presiona de nuevo este botón se le retiraran los permisos y debe de ingresar nuevamente la contraseña.",
+                                      "Para visualizar el usuario y la contraseña, presione este botón, ingrese su contraseña de inicio de sesión para habilitar la visualización y la edición de la llave, si presiona de nuevo este botón se le retiraran los permisos y debe de ingresar nuevamente la contraseña.",
                                 ),
                               ],
                             ),
@@ -310,7 +310,7 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "Para editar la información de la llave, presione este botón,  ingrese su contraseña de inicio de sesión para habilitar la visualización y la edición de la llave, si presiona de nuevo este botón se le redireccionará a la pantalla de edición de la llave",
+                                      "Para editar la información de la llave, presione este botón,  ingrese su contraseña de inicio de sesión para habilitar la visualización y la edición de la llave, si presiona de nuevo este botón se le redireccionará a la pantalla de edición de la llave",
                                 ),
                               ],
                             ),
@@ -396,8 +396,9 @@ class _KeycodeDetailsState extends State<KeycodeDetails> {
                   maxLines: 2,
                   minFontSize: 6,
                   style: TextStyle(
-                    color: _colors.iconsColor(context),
-                      fontWeight: FontWeight.bold, fontSize: 14),
+                      color: _colors.iconsColor(context),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
                 ),
               ],
             ),

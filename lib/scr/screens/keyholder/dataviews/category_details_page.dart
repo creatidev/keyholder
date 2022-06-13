@@ -151,8 +151,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: _colors.iconsColor(context)
-                                    ),
+                                        color: _colors.iconsColor(context)),
                                   ),
                                 ),
                                 DataColumn(

@@ -239,7 +239,13 @@ class _SignInPageState extends State<SignInPage> {
                     prefs.password = loginRequestModel!.password!;
                     //prefs.alias = value.user!.usuAlias!;
 
-                    final snackBar = SnackBar(content: Text(value.message!, style: TextStyle(color: _colors.textColor(context)),),backgroundColor: Colors.black38,);
+                    final snackBar = SnackBar(
+                      content: Text(
+                        value.message!,
+                        style: TextStyle(color: _colors.textColor(context)),
+                      ),
+                      backgroundColor: Colors.black38,
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(

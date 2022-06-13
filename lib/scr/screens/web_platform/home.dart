@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Visibility(
                   visible: _showForm,
-                   child: Container(
+                  child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height * 0.750,
                     color: Colors.black54,
@@ -137,8 +137,7 @@ class _HomePageState extends State<HomePage> {
                           //key: keyUserName,
                           //controller: _keyUserNameController,
                           name: "userName",
-                          autovalidateMode:
-                          AutovalidateMode.onUserInteraction,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           decoration: InputDecoration(
                               prefixIcon: Icon(Icons.label,
                                   color: Colors.deepPurpleAccent, size: 18),
@@ -147,9 +146,7 @@ class _HomePageState extends State<HomePage> {
                             FormBuilderValidators.required(
                                 errorText: 'Campo requerido')
                           ]),
-                          onChanged: (value) {
-
-                          },
+                          onChanged: (value) {},
                         ),
                         FormBuilderTextField(
                           //key: keyUserName,

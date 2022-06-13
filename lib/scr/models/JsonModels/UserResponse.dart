@@ -4,7 +4,8 @@
 
 import 'dart:convert';
 
-UserResponse userResponseFromJson(String str) => UserResponse.fromJson(json.decode(str));
+UserResponse userResponseFromJson(String str) =>
+    UserResponse.fromJson(json.decode(str));
 
 String userResponseToJson(UserResponse data) => json.encode(data.toJson());
 
@@ -20,16 +21,16 @@ class UserResponse {
   User? user;
 
   factory UserResponse.fromJson(Map<String, dynamic> json) => UserResponse(
-    status: json["status"],
-    message: json["message"],
-    user: User.fromJson(json["user"]),
-  );
+        status: json["status"],
+        message: json["message"],
+        user: User.fromJson(json["user"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "status": status,
-    "message": message,
-    "user": user!.toJson(),
-  };
+        "status": status,
+        "message": message,
+        "user": user!.toJson(),
+      };
 }
 
 class User {
@@ -54,24 +55,24 @@ class User {
   int? cellphone;
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["id"],
-    document: json["document"],
-    name: json["name"],
-    lastname: json["lastname"],
-    nickname: json["nickname"],
-    email: json["email"],
-    phone: json["phone"],
-    cellphone: json["cellphone"],
-  );
+        id: json["id"],
+        document: json["document"],
+        name: json["name"],
+        lastname: json["lastname"],
+        nickname: json["nickname"],
+        email: json["email"],
+        phone: json["phone"],
+        cellphone: json["cellphone"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "document": document,
-    "name": name,
-    "lastname": lastname,
-    "nickname": nickname,
-    "email": email,
-    "phone": phone,
-    "cellphone": cellphone,
-  };
+        "id": id,
+        "document": document,
+        "name": name,
+        "lastname": lastname,
+        "nickname": nickname,
+        "email": email,
+        "phone": phone,
+        "cellphone": cellphone,
+      };
 }

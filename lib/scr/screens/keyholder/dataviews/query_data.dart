@@ -44,7 +44,6 @@ class _QueryDataState extends State<QueryData> {
   //String? filePath;
   var _sortAscending = true;
 
-
 /*
   Future setJson(Categories? categories) async {
     _actionId = categories!.actionId;
@@ -122,9 +121,10 @@ class _QueryDataState extends State<QueryData> {
                 ? Padding(
                     padding: const EdgeInsets.only(bottom: 25),
                     child: PaginatedDataTable(
-                      header: Text('Acciones', style: TextStyle(
-                          color: Colors.orange
-                      ),),
+                      header: Text(
+                        'Acciones',
+                        style: TextStyle(color: Colors.orange),
+                      ),
                       rowsPerPage: _rowsPerPage,
                       sortAscending: _sortAscending,
                       sortColumnIndex: 0,
@@ -137,42 +137,50 @@ class _QueryDataState extends State<QueryData> {
                       source: KeyDataSource(_request.actions!),
                       columns: [
                         DataColumn(
-                            label: Text('Id', style: TextStyle(
-                              color: _colors.textColor(context)
-                            ),),
+                            label: Text(
+                              'Id',
+                              style:
+                                  TextStyle(color: _colors.textColor(context)),
+                            ),
                             numeric: true,
                             onSort: (index, sortAscending) {
                               setState(() {
                                 _sortAscending = sortAscending;
                                 if (sortAscending) {
-                                  _request!.actions!.sort((a, b) => a.id!.compareTo(b.id!));
+                                  _request!.actions!
+                                      .sort((a, b) => a.id!.compareTo(b.id!));
                                 } else {
-                                  _request!.actions!.sort((a, b) => b.id!.compareTo(a.id!));
+                                  _request!.actions!
+                                      .sort((a, b) => b.id!.compareTo(a.id!));
                                 }
                               });
                             }),
                         DataColumn(
-                          label: Text('Nombre', style: TextStyle(
-                              color: _colors.textColor(context)
-                          ),),
+                          label: Text(
+                            'Nombre',
+                            style: TextStyle(color: _colors.textColor(context)),
+                          ),
                           numeric: true,
                         ),
                         DataColumn(
-                          label: Text('Dirección Ip', style: TextStyle(
-                              color: _colors.textColor(context)
-                          ),),
+                          label: Text(
+                            'Dirección Ip',
+                            style: TextStyle(color: _colors.textColor(context)),
+                          ),
                           numeric: true,
                         ),
                         DataColumn(
-                          label: Text('Fecha de creación', style: TextStyle(
-                              color: _colors.textColor(context)
-                          ),),
+                          label: Text(
+                            'Fecha de creación',
+                            style: TextStyle(color: _colors.textColor(context)),
+                          ),
                           numeric: true,
                         ),
                         DataColumn(
-                          label: Text('Estado', style: TextStyle(
-                              color: _colors.textColor(context)
-                          ),),
+                          label: Text(
+                            'Estado',
+                            style: TextStyle(color: _colors.textColor(context)),
+                          ),
                           numeric: true,
                         ),
                       ],

@@ -5,9 +5,7 @@ ThemeData light = ThemeData(
     brightness: Brightness.light,
     primarySwatch: Colors.red,
     accentColor: Colors.redAccent,
-
-    scaffoldBackgroundColor: Color(0xfff1f1f1)
-);
+    scaffoldBackgroundColor: Color(0xfff1f1f1));
 
 ThemeData dark = ThemeData(
   brightness: Brightness.dark,
@@ -27,15 +25,14 @@ class ThemeNotifier with ChangeNotifier {
     _loadFromPrefs();
   }
 
-  toggleTheme(){
+  toggleTheme() {
     _darkTheme = !_darkTheme!;
     _saveToPrefs();
     notifyListeners();
   }
 
   _initPrefs() async {
-    if(_pref == null)
-      _pref  = await SharedPreferences.getInstance();
+    if (_pref == null) _pref = await SharedPreferences.getInstance();
   }
 
   _loadFromPrefs() async {
@@ -60,9 +57,9 @@ class CounterProvider with ChangeNotifier {
     _counter = value;
     notifyListeners();
   }
+
   void onChangeCats(value) {
     _countCats = value;
     notifyListeners();
   }
-
 }

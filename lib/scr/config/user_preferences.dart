@@ -175,5 +175,4 @@ class UserPreferences {
   bool checkUserId() {
     return _prefs!.containsKey('userId');
   }
-
 }

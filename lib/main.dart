@@ -99,7 +99,10 @@ class _MyAppState extends State<MyApp> {
       final snackBar = SnackBar(
         elevation: 10,
         backgroundColor: Colors.black87,
-        content: Text('Tiene acciones pendientes', style: TextStyle(color: Colors.deepPurpleAccent),),
+        content: Text(
+          'Tiene acciones pendientes',
+          style: TextStyle(color: Colors.deepPurpleAccent),
+        ),
         duration: Duration(seconds: 30),
         action: SnackBarAction(
           label: 'Aceptar',
@@ -142,7 +145,7 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print(prefs.userId);
-    if(prefs.checkUserId() == false){
+    if (prefs.checkUserId() == false) {
       return SignInPage();
     } else {
       return MainView();

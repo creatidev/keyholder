@@ -9,7 +9,6 @@ class LoginResponseModel {
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
     return LoginResponseModel(
-
         token: json['token'] != null ? json['token'] : '',
         error: json['error'] != null ? json['error'] : '',
         message: json['message'] != null ? json['message'] : '');
@@ -42,7 +41,8 @@ class StatusDataModel {
   bool? status;
   String? message;
 
-  factory StatusDataModel.fromJson(Map<String, dynamic> json) => StatusDataModel(
+  factory StatusDataModel.fromJson(Map<String, dynamic> json) =>
+      StatusDataModel(
         status: json['status'] != null ? json['status'] : '',
         message: json['message'] != null ? json['message'] : '',
       );

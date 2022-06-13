@@ -112,11 +112,11 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "Las categorías no son mas que el nombre de las acciones, por ser requeridas siempre por medio del nombre, se categorizan.\n\n",
+                                      "Las categorías no son mas que el nombre de las acciones, por ser requeridas siempre por medio del nombre, se categorizan.\n\n",
                                 ),
                                 TextSpan(
                                   text:
-                                  "Para volver a visualizar este tutorial, presione sobre el icono señalado.",
+                                      "Para volver a visualizar este tutorial, presione sobre el icono señalado.",
                                 ),
                               ],
                             ),
@@ -279,8 +279,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text:
-                                      "Vuelve a la página anterior.\n\n",
+                                  text: "Vuelve a la página anterior.\n\n",
                                 ),
                               ],
                             ),

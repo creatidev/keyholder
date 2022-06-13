@@ -166,7 +166,7 @@ class _UserRequestListState extends State<UserRequestList> {
                             "QBayes NOC",
                             "¿Desea cancelar esta acción?",
                             "Si",
-                                () {
+                            () {
                               _statusId = false;
                               EasyLoading.show(
                                   status: 'Cancelando acción...',
@@ -181,11 +181,12 @@ class _UserRequestListState extends State<UserRequestList> {
                                     .then((value) {
                                   setState(() => request.selectedStatus = "2");
                                   EasyLoading.showSuccess(
-                                      "Acción cancelada por el usuario.",
-                                      maskType: EasyLoadingMaskType.custom,
-                                      duration: Duration(milliseconds: 1000))
+                                          "Acción cancelada por el usuario.",
+                                          maskType: EasyLoadingMaskType.custom,
+                                          duration:
+                                              Duration(milliseconds: 1000))
                                       .then((value) =>
-                                  {Navigator.of(context).pop()});
+                                          {Navigator.of(context).pop()});
                                 });
                               });
                             },
@@ -258,11 +259,11 @@ class _UserRequestListState extends State<UserRequestList> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AutoSizeText(
-                       '$actId - $actionName',
+                      '$actId - $actionName',
                       maxLines: 2,
                       minFontSize: 7,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 12),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                     Row(
                       children: [

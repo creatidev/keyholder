@@ -3,15 +3,17 @@ import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/RequestData.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/UserResponse.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/WebDataModel.dart';
-import 'package:digitalkeyholder/testing/login_model.dart';
+import 'package:digitalkeyholder/scr/models/Login_Model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-final _urlMain = 'https://quanticdatacenternoc.asicamericas.com/qbayes_restapi';
-final _apiKey = 'f4e3ff1b-ac39-4d97-8ec2-3165141dfcef';
+final _urlMain = dotenv.get('API_URL');
+final _apiKey = dotenv.get('API_KEY');
 
 class APIService with ChangeNotifier {
   Request? request;
+  String? jsonData;
   int count = 0;
   bool _isLoading = true;
   String _selectedStatus = "2";
@@ -45,6 +47,7 @@ class APIService with ChangeNotifier {
 
     final data = jsonDecode(response.body);
     var decodedInfo = utf8.decode(base64.decode(data['information']));
+    jsonData = decodedInfo;
     print(decodedInfo);
     final categoriesResponse = requestFromJson(decodedInfo);
     count = categoriesResponse.actions!.length;

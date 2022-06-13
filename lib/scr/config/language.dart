@@ -44,7 +44,7 @@ class LangWords {
 
   LangWords(
       {this.showPassword = 'Mostrar contraseña',
-      this.mainName = 'QBayes Step Up!',
+      this.mainName = 'QBayes NOC',
       this.loginWith = 'Iniciar con',
       this.email = 'Correo electrónico',
       this.hintName = 'Nombre',
@@ -53,8 +53,7 @@ class LangWords {
       this.hintLoginPassword = 'Contraseña',
       this.recoverPassword = '¿Olvidó su contraseña?',
       this.messageRecoverPassword =
-          'Para cambiar la contraseña, ingrese el correo electrónico y presione enviar solicitud de cambio de contraseña, recibirá un correo'
-              ' electrónico con una nueva contraseña, que puede cambiar internamente en la aplicación.',
+          'Ingrese un correo electrónico para enviarle una nueva contraseña, recuerde cambiarla al iniciar la sesión.',
       this.hintLoginUser = 'Nombre de usuario o correo electrónico',
       this.messageRepeatPassword = 'Repetir contraseña',
       this.requestChangePassword = 'Enviar solicitud de cambio de contraseña',

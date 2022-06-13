@@ -1,15 +1,12 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
-import 'package:digitalkeyholder/scr/models/sign_up_model.dart';
-import 'package:digitalkeyholder/scr/screens/home/footer_login.dart';
-import 'package:digitalkeyholder/scr/screens/widgets/CustomFloatingActionButton.dart';
-import 'package:digitalkeyholder/scr/screens/widgets/PasswordField.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:digitalkeyholder/scr/models/SignUpModel.dart';
+import 'package:digitalkeyholder/scr/screens/home/footer.dart';
+import 'package:digitalkeyholder/scr/screens/widgets/custom_floating_action_button.dart';
+import 'package:digitalkeyholder/scr/screens/widgets/password_field.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
-
-import '../home/loading_login_page.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key, this.funSignUp, this.isFooter, this.logo})
@@ -39,9 +36,18 @@ class _SignUpPageState extends State<SignUpPage> {
   bool isRequest = false;
   bool isNoVisiblePassword = true;
   bool _isObscure = true;
+  String? _emailPhone;
   String? _password;
   String? _helperText;
   Icon _icon = Icon(Icons.check, color: Colors.deepPurpleAccent, size: 18);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(_validatePhoneNumber('3105553238'));
+
+  }
 
   String? _validatePhoneNumber(String value) {
     if (value.isEmpty) return 'Número de celular es requerido.';
@@ -85,12 +91,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                     color: Colors.deepPurpleAccent, size: 18),
                                 labelText: "Correo electrónico"),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: "Este campo no puede estar vacío"),
-                              FormBuilderValidators.email(context,
+                              FormBuilderValidators.email(
                                   errorText:
                                       "Introduzca una dirección de correo electrónico válida"),
-                            ]),
+                               ]),
                           ),
                           FormBuilderTextField(
                             controller: _nameController,
@@ -102,7 +108,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             validator: FormBuilderValidators.compose([
                               FormBuilderValidators.match(
-                                  context, r'^[A-Za-z ]+$',
+                                  r'^[A-Za-z ]+$',
                                   errorText:
                                       'Ingrese solo caracteres alfabéticos.')
                             ]),
@@ -116,7 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               labelText: "Cédula",
                             ),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText:
                                       "Se requiere un número de cédula válido")
                             ]),
@@ -133,13 +139,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                 prefixText: "+57"),
                             maxLength: 10,
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: "Este campo es requerido"),
-                              FormBuilderValidators.numeric(context,
+                              FormBuilderValidators.numeric(
                                   errorText:
                                       "Este campo solo admite caracteres numericos."),
-                              FormBuilderValidators.maxLength(context, 10),
-                              FormBuilderValidators.minLength(context, 10,
+                              FormBuilderValidators.maxLength(10),
+                              FormBuilderValidators.minLength(10,
                                   errorText:
                                       "Ingrese un número de celular válido.")
                             ]),
@@ -151,20 +157,20 @@ class _SignUpPageState extends State<SignUpPage> {
                             //helperText: 'No más de 15 caracteres.',
                             labelText: 'Contraseña',
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText:
                                       "Por favor ingrese una contraseña"),
-                              FormBuilderValidators.minLength(context, 8,
+                              FormBuilderValidators.minLength(8,
                                   errorText: "Mínimo 8 caracteres"),
                               FormBuilderValidators.match(
-                                  context, r'^(?=.*[A-Z]).{8,}$',
+                                  r'^(?=.*[A-Z]).{8,}$',
                                   errorText:
                                       r'Se requiere al menos una letra mayúscula'),
                               FormBuilderValidators.match(
-                                  context, r'^(?=.*?[0-9]).{8,}$',
+                                  r'^(?=.*?[0-9]).{8,}$',
                                   errorText: r'Se requiere al menos un digito'),
                               FormBuilderValidators.match(
-                                  context, r'^(?=.*?[#?!@$%^&*-]).{8,}$',
+                                  r'^(?=.*?[#?!@$%^&*-]).{8,}$',
                                   errorText:
                                       r'Se requiere al menos un caracter especial (-!#$%&?*)')
                             ]),
@@ -225,6 +231,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         SizedBox(height: 10),
                         CustomFloatingActionButton(
+                          onPressed: (){},
                           labelText: "",
                           backgroundColor: _colors.shadowColor(context),
                           heroTag: "Btn2",

@@ -1,5 +1,4 @@
 import 'package:digitalkeyholder/scr/config/themes.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 
 class Footer extends StatelessWidget {

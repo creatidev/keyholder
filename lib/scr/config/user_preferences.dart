@@ -31,6 +31,14 @@ class UserPreferences {
     _prefs!.setString('password', value);
   }
 
+  bool? get showPassword {
+    return _prefs!.getBool('showPassword') ?? false;
+  }
+
+  set showPassword(bool? value) {
+    _prefs!.setBool('showPassword', value!);
+  }
+
   int get keyCount {
     return _prefs!.getInt('keyCount') ?? 0;
   }
@@ -45,6 +53,14 @@ class UserPreferences {
 
   set firstSend(bool? value) {
     _prefs!.setBool('firstSend', value!);
+  }
+
+  bool? get firstViewOrEdit {
+    return _prefs!.getBool('firstViewOrEdit') ?? true;
+  }
+
+  set firstViewOrEdit(bool? value) {
+    _prefs!.setBool('firstViewOrEdit', value!);
   }
 
   bool? get firstViewCategory {
@@ -146,4 +162,18 @@ class UserPreferences {
   List<Categories> get listCategories {
     return _listCategories;
   }
+
+  removeValues() async {
+    _prefs!.remove('userId');
+    _prefs!.remove('userName');
+    _prefs!.remove('lastName');
+    _prefs!.remove('email');
+    _prefs!.remove('phone');
+    _prefs!.remove('password');
+  }
+
+  bool checkUserId() {
+    return _prefs!.containsKey('userId');
+  }
+
 }

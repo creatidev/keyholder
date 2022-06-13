@@ -1,13 +1,14 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
+import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/AddEditKeycode_Page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/add_edit_keycode_page.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
-import 'KeycodeDetails_Page.dart';
+import 'keycode_details_page.dart';
 
 class CategoryDetails extends StatefulWidget {
   const CategoryDetails({
@@ -23,7 +24,7 @@ class CategoryDetails extends StatefulWidget {
 class _CategoryDetailsState extends State<CategoryDetails> {
   DBService? dbService;
   Keycode? model;
-
+  final prefs = new UserPreferences();
   @override
   void initState() {
     // TODO: implement initState
@@ -55,7 +56,10 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                         },
                         children: [
                           TableRow(children: [
-                            Icon(Icons.label, color: _colors.iconsColor(context),),
+                            Icon(
+                              Icons.label,
+                              color: _colors.iconsColor(context),
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(2.0),
                               child: Row(
@@ -124,7 +128,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: _colors.textColor(context)),
+                                        color: _colors.iconsColor(context)),
                                   ),
                                 ],
                               ),
@@ -139,7 +143,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                   style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
-                                      color: _colors.textColor(context)),
+                                      color: _colors.iconsColor(context)),
                                 )),
                                 DataColumn(
                                   label: Text(
@@ -147,7 +151,8 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w900,
-                                        color: _colors.textColor(context)),
+                                        color: _colors.iconsColor(context)
+                                    ),
                                   ),
                                 ),
                                 DataColumn(
@@ -156,7 +161,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                     style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: _colors.textColor(context)),
+                                        color: _colors.iconsColor(context)),
                                   ),
                                 ),
                               ],
@@ -173,7 +178,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                           },
                                           cells: <DataCell>[
                                             DataCell(Text(data.id.toString())),
-                                            DataCell(Text(data.name!)),
+                                            DataCell(Text(data.label!)),
                                             DataCell(
                                               Center(
                                                 child: Row(
@@ -184,39 +189,67 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                                                     IconButton(
                                                       padding:
                                                           EdgeInsets.all(0),
-                                                      icon: Icon(Icons.edit, color: _colors.iconsColor(context),),
+                                                      icon: Icon(
+                                                        Icons.edit,
+                                                        color:
+                                                            _colors.iconsColor(
+                                                                context),
+                                                      ),
                                                       onPressed: () {
-                                                        Navigator.push(context,
-                                                            MaterialPageRoute<
-                                                                int>(
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return AddEditKeycodePage(
-                                                              keycodeModel:
-                                                                  data,
-                                                              isCreateMode:
-                                                                  false,
-                                                              isEditMode: true,
-                                                              isAutoMode: false,
-                                                            );
-                                                          },
-                                                        )).then((result) {
-                                                          if (result != null) {
-                                                            setState(() {
-                                                              super.widget;
-                                                            });
-                                                          }
-                                                        });
+                                                        if (prefs
+                                                                .showPassword ==
+                                                            true) {
+                                                          Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute<
+                                                                  int>(
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AddEditKeycodePage(
+                                                                keycodeModel:
+                                                                    data,
+                                                                isCreateMode:
+                                                                    false,
+                                                                isEditMode:
+                                                                    true,
+                                                                isAutoMode:
+                                                                    false,
+                                                              );
+                                                            },
+                                                          )).then((result) {
+                                                            if (result !=
+                                                                null) {
+                                                              setState(() {
+                                                                super.widget;
+                                                              });
+                                                            }
+                                                          });
+                                                        } else {
+                                                          Navigator.of(context).push(
+                                                              MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          KeycodeDetails(
+                                                                            keycodeModel:
+                                                                                data,
+                                                                          )));
+                                                        }
                                                       },
                                                     ),
                                                     IconButton(
                                                       padding:
                                                           EdgeInsets.all(0),
-                                                      icon: Icon(Icons.clear, color: _colors.iconsColor(context),),
+                                                      icon: Icon(
+                                                        Icons.clear,
+                                                        color:
+                                                            _colors.iconsColor(
+                                                                context),
+                                                      ),
                                                       onPressed: () {
                                                         FormHelper.showMessage(
                                                           context,
-                                                          "QBayes Step Up!",
+                                                          "QBayes NOC",
                                                           "¿Desea eliminar esta llave?",
                                                           "Si",
                                                           () {
@@ -271,7 +304,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                   shape: NeumorphicShape.flat,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: _colors.textColor(context),
+                  shadowLightColor: _colors.shadowColor(context),
                   depth: 2,
                   intensity: 1),
               tooltip: langWords.cancel,
@@ -279,7 +312,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                 margin: EdgeInsets.all(2),
                 child: Icon(
                   Icons.cancel,
-                  color: _colors.textColor(context),
+                  color: _colors.iconsColor(context),
                   size: 30,
                 ),
               ),
@@ -293,7 +326,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                   shape: NeumorphicShape.flat,
                   boxShape:
                       NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: _colors.textColor(context),
+                  shadowLightColor: _colors.shadowColor(context),
                   depth: 2,
                   intensity: 1),
               tooltip: langWords.addCategory,
@@ -301,7 +334,7 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                 margin: EdgeInsets.all(2),
                 child: Icon(
                   Icons.add_circle,
-                  color: _colors.textColor(context),
+                  color: _colors.iconsColor(context),
                   size: 30,
                 ),
               ),

@@ -4,11 +4,10 @@ import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
-import 'package:intl/intl.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class AddEditCategoryPage extends StatefulWidget {
@@ -27,18 +26,17 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
   var keyCancel = GlobalKey();
   CustomColors _colors = new CustomColors();
   Categories? categoryModel;
-  DBService? dbService;
+  DBService? _dbService;
   var langWords = LangWords();
   final _formKeyCard = GlobalKey<FormBuilderState>();
   final _categoryController = TextEditingController();
   var visibleDatePicker = false;
-  var myFormat = DateFormat('d-MM-yyyy');
   List<TargetFocus> targets = [];
 
   @override
   void initState() {
     super.initState();
-    dbService = new DBService();
+    _dbService = new DBService();
     categoryModel = new Categories();
     if (prefs.firstCategory == true) {
       showTutorial();
@@ -52,7 +50,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
         targets: targets, // List<TargetFocus>
         colorShadow: Colors.black, // DEFAULT Colors.black
         // alignSkip: Alignment.bottomRight,
-        textSkip: "Saltar",
+        textSkip: "Omitir",
         // paddingFocus: 10,
         // focusAnimationDuration: Duration(milliseconds: 500),
         // pulseAnimationDuration: Duration(milliseconds: 500),
@@ -60,7 +58,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
         onFinish: () {}, onClickTarget: (target) {
       print(target);
     }, onSkip: () {
-      EasyLoading.showInfo('Tutorial cancelado por el usuario.',
+      EasyLoading.showInfo('Tutorial omitido por el usuario.',
           maskType: EasyLoadingMaskType.custom,
           duration: Duration(milliseconds: 1000));
     })
@@ -114,7 +112,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "Las categorías no son mas que el nombre del requerimiento, por ser requeridas siempre por medio del nombre, se categorizan.\n\n",
+                                  "Las categorías no son mas que el nombre de las acciones, por ser requeridas siempre por medio del nombre, se categorizan.\n\n",
                                 ),
                                 TextSpan(
                                   text:
@@ -367,7 +365,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               onTap: () {
                 FormHelper.showMessage(
                   context,
-                  "QBayes Step Up!",
+                  "QBayes NOC",
                   "¿Ver tutorial de la sección?",
                   "Si",
                   () {
@@ -429,7 +427,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                                     color: Colors.deepPurpleAccent, size: 18),
                                 labelText: langWords.category),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: langWords.requiredField)
                             ]),
                             maxLength: 30,
@@ -499,21 +497,20 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     var getCategory =
                         "SELECT * FROM categorytable WHERE category = "
                         "'${_categoryController.text}'";
-
-                    dbService!.getKeycodeByCategory(getCategory).then((value) {
+                    _dbService!.getKeycodeByCategory(getCategory).then((value) {
                       if (value.length == 0) {
-                        dbService!.addCategory(categoryModel!).then((value) {
+                        _dbService!.addCategory(categoryModel!).then((value) {
                           EasyLoading.showInfo(
                               'Categoría registrada correctamente',
                               maskType: EasyLoadingMaskType.custom,
                               duration: Duration(milliseconds: 2000));
                           _resetForm();
-                          Navigator.of(context).pop();
+                          Navigator.pop(context, categoryModel!.category);
                         });
                       } else {
                         FormHelper.showMessage(
                             context,
-                            'QBayes Step Up!',
+                            'QBayes NOC',
                             'Ya existe la categoría ${_categoryController.text}',
                             'Ok', () {
                           Navigator.of(context).pop();

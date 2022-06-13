@@ -1,9 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="quantic.digitalkeyholder">
 
    <application
-        android:label="QBayes Step Up!"
-        android:icon="@mipmap/ic_launcher">
+        android:label="QBayes NOC"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

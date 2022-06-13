@@ -1,13 +1,12 @@
 import 'dart:io';
-import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
-import 'package:digitalkeyholder/scr/screens/authenticate/Sign_In_Page.dart';
-import 'package:digitalkeyholder/scr/screens/authenticate/Sign_Up_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/Mainview_Page.dart';
+import 'package:digitalkeyholder/scr/screens/authenticate/sign_in_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/main_view_page.dart';
 import 'package:digitalkeyholder/scr/services/push_notification_service.dart';
-import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
-import 'package:digitalkeyholder/testing/api_service.dart';
+import 'package:digitalkeyholder/scr/services/theme_notifier.dart';
+import 'package:digitalkeyholder/scr/services/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
@@ -16,14 +15,11 @@ var initialRoute = '/';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   HttpOverrides.global = new MyHttpOverrides();
   await PushNotificationService.initializeApp();
   final prefs = new UserPreferences();
   await prefs.initPrefs();
-/*  if (prefs.login == 'Iniciada') {
-    initialRoute = '/home';
-  }*/
-
   configLoading();
   runApp(KeyHolder());
 }
@@ -63,8 +59,7 @@ class _KeyHolderState extends State<KeyHolder> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(providers: [
-      ChangeNotifierProvider<ThemeNotifier>(
-          create: (_) => ThemeNotifier()),
+      ChangeNotifierProvider<ThemeNotifier>(create: (_) => ThemeNotifier()),
       ChangeNotifierProvider(create: (_) => new CounterProvider()),
       ChangeNotifierProvider(create: (_) => new APIService()),
     ], child: MyApp());
@@ -101,7 +96,19 @@ class _MyAppState extends State<MyApp> {
       final request = Provider.of<APIService>(context, listen: false);
       setState(() => request.selectedStatus = "2");
 
-      final snackBar = SnackBar(content: Text('Requerimientos actualizados'));
+      final snackBar = SnackBar(
+        elevation: 10,
+        backgroundColor: Colors.black87,
+        content: Text('Tiene acciones pendientes', style: TextStyle(color: Colors.deepPurpleAccent),),
+        duration: Duration(seconds: 30),
+        action: SnackBarAction(
+          label: 'Aceptar',
+          textColor: Colors.cyan,
+          onPressed: () {
+            messengerKey.currentState?.hideCurrentSnackBar();
+          },
+        ),
+      );
       messengerKey.currentState?.showSnackBar(snackBar);
       //navigatorKey.currentState?.push(MaterialPageRoute(
       // builder: (BuildContext context) => RequestedKeyring(),
@@ -134,11 +141,8 @@ class Wrapper extends StatelessWidget {
   final prefs = new UserPreferences();
   @override
   Widget build(BuildContext context) {
-    //var theme = Provider.of<ThemeBloc>(context);
     print(prefs.userId);
-
-    //Devuelve la página inicial o de login
-    if (prefs.userId == '0') {
+    if(prefs.checkUserId() == false){
       return SignInPage();
     } else {
       return MainView();

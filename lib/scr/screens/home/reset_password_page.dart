@@ -2,14 +2,12 @@ import 'package:digitalkeyholder/main.dart';
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/icon/quantic_logo_icons.dart';
-import 'package:digitalkeyholder/scr/screens/widgets/CustomFloatingActionButton.dart';
-import 'package:digitalkeyholder/testing/api_service.dart';
-import 'package:flutter/material.dart';
+import 'package:digitalkeyholder/scr/services/api_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
-
-import 'footer_login.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'footer.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   @override
@@ -31,13 +29,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         child: Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.9,
+          height: MediaQuery.of(context).size.height * 0.92,
           width: MediaQuery.of(context).size.width,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 width: 220,
                 height: 220,
@@ -89,9 +90,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                   color: Colors.deepPurpleAccent, size: 15),
                               labelText: langWords!.email),
                           validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(context,
+                            FormBuilderValidators.required(
                                 errorText: "Este campo no puede estar vacío"),
-                            FormBuilderValidators.email(context,
+                            FormBuilderValidators.email(
                                 errorText:
                                     "Introduzca una dirección de correo electrónico válida"),
                           ]),
@@ -106,63 +107,137 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               ),
               Container(
                 //color: Colors.deepPurpleAccent,
-                height: 160,
-                padding: const EdgeInsets.only(top: 30),
+                height: 90,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        CustomFloatingActionButton(
-                          labelText: langWords!.requestChangePassword,
-                          backgroundColor: _colors.shadowColor(context),
-                          heroTag: "Btn1",
-                          onPressed: () {
-                            if (_formKey.currentState!.saveAndValidate()) {
-                              APIService apiService = new APIService();
-                              EasyLoading.show(
-                                  status:
-                                      'Enviando solicitud de recuperación de contraseña...',
-                                  maskType: EasyLoadingMaskType.black);
-                              apiService.restorePassword(_email!).then((value) {
-                                print(value.message);
-
-                                //prefs.alias = value.user!.usuAlias!;
-
-                                final snackBar =
-                                    SnackBar(content: Text(value.message!));
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBar);
-                                EasyLoading.dismiss();
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) => Wrapper(),
-                                  ),
-                                );
-                              });
-                            }
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        CustomFloatingActionButton(
-                          labelText: "",
-                          backgroundColor: _colors.shadowColor(context),
-                          heroTag: "Btn2",
-                        ),
-                        SizedBox(height: 10),
-                        CustomFloatingActionButton(
-                          labelText: langWords!.cancel,
-                          backgroundColor: _colors.shadowColor(context),
-                          heroTag: "Btn3",
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
+                    NeumorphicButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.saveAndValidate()) {
+                          APIService apiService = new APIService();
+                          EasyLoading.show(
+                              status:
+                                  'Enviando solicitud de recuperación de contraseña...',
+                              maskType: EasyLoadingMaskType.black);
+                          apiService.restorePassword(_email!).then((value) {
+                            final snackBar =
+                                SnackBar(content: Text(value.message!));
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                            EasyLoading.dismiss();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) => Wrapper(),
+                              ),
+                            );
+                          });
+                        }
+                      },
+                      tooltip: 'Iniciar sesión',
+                      style: NeumorphicStyle(
+                          color: _colors.iconsColor(context),
+                          shape: NeumorphicShape.flat,
+                          boxShape: NeumorphicBoxShape.rect(),
+                          shadowLightColor: _colors.iconsColor(context),
+                          depth: 1,
+                          intensity: 1),
+                      padding: const EdgeInsets.all(7.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          NeumorphicIcon(
+                            Icons.login,
+                            size: 18,
+                            style: NeumorphicStyle(
+                                color: _colors.textButtonColor(context),
+                                shadowLightColor: _colors.shadowColor(context),
+                                depth: 2,
+                                intensity: 0.9),
+                          ),
+                          NeumorphicText(
+                            'Enviar  ',
+                            style: NeumorphicStyle(
+                              color: _colors.textButtonColor(context),
+                              intensity: 0.7,
+                              depth: 1,
+                              shadowLightColor:
+                                  _colors.shadowTextColor(context),
+                            ),
+                            textStyle: NeumorphicTextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          NeumorphicIcon(
+                            Icons.login,
+                            size: 18,
+                            style: NeumorphicStyle(
+                                color: _colors.textButtonColor(context),
+                                shadowLightColor: _colors.shadowColor(context),
+                                depth: 2,
+                                intensity: 0.9),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      color: _colors.iconsColor(context),
+                      height: 5,
+                      width: MediaQuery.of(context).size.width,
+                    ),
+                    NeumorphicButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      tooltip: 'Cancelar',
+                      style: NeumorphicStyle(
+                          color: _colors.iconsColor(context),
+                          shape: NeumorphicShape.flat,
+                          boxShape: NeumorphicBoxShape.rect(),
+                          shadowLightColor: _colors.iconsColor(context),
+                          depth: 1,
+                          intensity: 1),
+                      padding: const EdgeInsets.all(7.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          NeumorphicIcon(
+                            Icons.password,
+                            size: 18,
+                            style: NeumorphicStyle(
+                                color: _colors.textButtonColor(context),
+                                shadowLightColor: _colors.shadowColor(context),
+                                depth: 2,
+                                intensity: 0.9),
+                          ),
+                          NeumorphicText(
+                            'Cancelar ',
+                            style: NeumorphicStyle(
+                              color: _colors.textButtonColor(context),
+                              intensity: 0.7,
+                              depth: 1,
+                              shadowLightColor:
+                                  _colors.shadowTextColor(context),
+                            ),
+                            textStyle: NeumorphicTextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          NeumorphicIcon(
+                            Icons.password,
+                            size: 18,
+                            style: NeumorphicStyle(
+                                color: _colors.textButtonColor(context),
+                                shadowLightColor: _colors.shadowColor(context),
+                                depth: 2,
+                                intensity: 0.9),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

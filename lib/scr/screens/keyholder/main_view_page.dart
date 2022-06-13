@@ -1,28 +1,28 @@
-// ignore: import_of_legacy_library_into_null_safe
+import 'dart:io';
+
 import 'package:badges/badges.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/icon/quantic_logo_icons.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/AddEditCategory_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/Options_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/RegisteredKeycodes_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/RegisteredCategoryAddOption.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/UserInfo_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/UserRequest_Page.dart';
-import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/add_edit_category_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/about_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/query_data.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/registered_keycodes_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/registered_category_add_option.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/user_info_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/user_request_page.dart';
+import 'package:digitalkeyholder/scr/services/theme_notifier.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
-import 'package:digitalkeyholder/testing/api_service.dart';
-import 'package:flutter/material.dart';
+import 'package:digitalkeyholder/scr/services/api_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 import 'package:we_slide/we_slide.dart';
-import 'AddEditKeycode_Page.dart';
+import 'add_edit_keycode_page.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class MainView extends StatefulWidget {
@@ -41,36 +41,35 @@ class _MainViewState extends State<MainView> {
   var keyList = GlobalKey();
   var keyCodeRegList = GlobalKey();
   var keyCatRegList = GlobalKey();
-  var keyStatus = GlobalKey();
-  var keyStop = GlobalKey();
-
+  var keyPause = GlobalKey();
+  var keyPlay = GlobalKey();
+  var keyCancel = GlobalKey();
+  final WeSlideController _controller = WeSlideController();
   List<TargetFocus> targets = [];
   final prefs = new UserPreferences();
   CustomColors _colors = new CustomColors();
   var _textController = TextEditingController();
-  PageController pageController = PageController(initialPage: 0);
-  var _title = 'Requerimientos';
+  var _title = 'Acciones pendientes';
   var _demoMode = false;
-  var currentIndex = 0;
-  var disEditMode = false;
-  var isCreateMode = false;
+  var _currentIndex = 0;
   var _status = true;
   var _showBadge = true;
-
+  var langWords;
   DBService? dbService;
   Categories? model;
   var visibleText = true;
   Icon _icon = Icon(Icons.refresh);
-  var langWords;
+  var _groupValue = 1;
   List<Categories>? requestedCategories = [];
   String badgeText = '0';
+  String? filePath;
 
   void showTutorial() {
     TutorialCoachMark tutorial = TutorialCoachMark(context,
         targets: targets, // List<TargetFocus>
         colorShadow: Colors.black, // DEFAULT Colors.black
         // alignSkip: Alignment.bottomRight,
-        textSkip: "Saltar",
+        textSkip: "Omitir",
         // paddingFocus: 10,
         // focusAnimationDuration: Duration(milliseconds: 500),
         // pulseAnimationDuration: Duration(milliseconds: 500),
@@ -81,7 +80,7 @@ class _MainViewState extends State<MainView> {
       print(target);
     }, onSkip: () {
       setState(() => _demoMode = false);
-      EasyLoading.showInfo('Tutorial cancelado por el usuario.',
+      EasyLoading.showInfo('Tutorial omitido por el usuario.',
           maskType: EasyLoadingMaskType.custom,
           duration: Duration(milliseconds: 1000));
     })
@@ -100,11 +99,16 @@ class _MainViewState extends State<MainView> {
     dbService = new DBService();
     model = new Categories();
 
-    setTutorial();
+    Future.delayed(Duration(microseconds: 1000)).then((value) {
+      final request = Provider.of<APIService>(context, listen: false);
+      request.selectedStatus = "2";
+    });
 
+    setTutorial();
+    prefs.showPassword = false;
     if (prefs.firstRun == true) {
       _demoMode = true;
-      Future.delayed(Duration(microseconds: 200)).then((value) {
+      Future.delayed(Duration(microseconds: 3000)).then((value) {
         showTutorial();
       });
       prefs.firstRun = false;
@@ -115,75 +119,88 @@ class _MainViewState extends State<MainView> {
     targets.clear();
     targets.add(TargetFocus(
         identify: "Target 0",
-        keyTarget: keyHelp,
+        //keyTarget: keyList,
+        shape: ShapeLightFocus.RRect,
+        targetPosition: TargetPosition(Size(400, 80), Offset(0.0, 165.0)),
+        alignSkip: AlignmentGeometry.lerp(
+            Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
         contents: [
           TargetContent(
               align: ContentAlign.bottom,
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.help_outline, color: Colors.cyanAccent),
-                        ],
-                      ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.live_help_outlined,
+                            color: Colors.cyanAccent),
+                      ],
                     ),
-                    Text(
-                      "Bienvenido",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.cyanAccent,
-                          fontSize: 20.0),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      //color: Colors.deepPurpleAccent,
-                      //height: 200,
-                      child: Column(
-                        children: [
-                          RichText(
-                            textAlign: TextAlign.justify,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text:
-                                      "A continuación se iniciará el tutorial del llavero Qbayes Step Up!, aunque se recomienda que sea visualizado por completo la primera vez, puede saltarlo y verlo cuando lo desee en el icono seleccionado. Los tutoriales se dividen por sección.",
-                                ),
-                              ],
-                            ),
+                  ),
+                  Text(
+                    "Bienvenido",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.cyanAccent,
+                        fontSize: 20.0),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    //color: Colors.deepPurpleAccent,
+                    //height: 200,
+                    child: Column(
+                      children: [
+                        RichText(
+                          textAlign: TextAlign.justify,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text:
+                                    "A continuación se iniciará el tutorial del llavero QBayes NOC, aunque se recomienda que sea visualizado por completo la primera vez, puede omitirlo y verlo cuando lo desee tocando en el icono ",
+                              ),
+                              WidgetSpan(
+                                  child: Icon(
+                                Icons.help_outline,
+                                size: 14,
+                                color: Colors.cyanAccent,
+                              )),
+                              TextSpan(
+                                text:
+                                    " en la part superior derecha de la pantalla. Recuerde que los tutoriales se dividen por sección.",
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      "",
+                      style: TextStyle(color: Colors.white),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 100.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Toque en cualquier parte para continuar.",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 100.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Toque en cualquier parte para continuar.",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ))
         ]));
     targets.add(TargetFocus(
         identify: "Target 1",
@@ -242,6 +259,124 @@ class _MainViewState extends State<MainView> {
         ]));
     targets.add(TargetFocus(
         identify: "Target 2",
+        keyTarget: keyFilter,
+        shape: ShapeLightFocus.RRect,
+        //targetPosition: TargetPosition(Size(400, 20), Offset(0.0, 125.0)),
+        alignSkip: AlignmentGeometry.lerp(
+            Alignment.bottomRight, Alignment.center, 0.0),
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+              align: ContentAlign.bottom,
+              child: Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Estado de las acciones",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurpleAccent,
+                          fontSize: 20.0),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      //color: Colors.grey,
+                      height: 200,
+                      width: 400,
+                      child: Table(
+                        border: TableBorder.all(color: Colors.white12),
+                        columnWidths: {
+                          0: FlexColumnWidth(10),
+                          1: FlexColumnWidth(90)
+                        },
+                        children: [
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.pause,
+                                    color: Colors.orange,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Acción pendiente por completar',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.history,
+                                    color: Colors.orange,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Historial de acciones',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 100.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Toque en cualquier parte para continuar.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ]));
+    targets.add(TargetFocus(
+        identify: "Target 3",
         keyTarget: keyActionButton,
         alignSkip:
             AlignmentGeometry.lerp(Alignment.topRight, Alignment.center, 0.0),
@@ -255,7 +390,7 @@ class _MainViewState extends State<MainView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "Acciones",
+                      "Acciones en espera...",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepPurpleAccent,
@@ -273,7 +408,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "Actualice requerimientos, administre las llaves y categorías almacenadas.",
+                                      "Actualice acciones, administre las llaves y categorías almacenadas.",
                                 ),
                               ],
                             ),
@@ -322,52 +457,10 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "La burbuja amarilla mostrará la cantidad de requerimientos asignados a su cuenta.",
+                                      "La burbuja amarilla mostrará la cantidad de acciones asignadas a su cuenta.",
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ))
-        ]));
-    targets.add(TargetFocus(
-        identify: "Target 3",
-        keyTarget: keyFilter,
-        enableOverlayTab: true,
-        contents: [
-          TargetContent(
-              align: ContentAlign.bottom,
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Cambio de estado",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurpleAccent,
-                          fontSize: 20.0),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "Seleccione por estado de requerimiento, por defecto se encuentran los requerimientos pendientes.",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 100.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Toque en cualquier parte para continuar.",
-                            style: TextStyle(color: Colors.white),
                           ),
                         ],
                       ),
@@ -423,10 +516,9 @@ class _MainViewState extends State<MainView> {
       ],
     ));
     targets.add(TargetFocus(
-        identify: "Target 5",
-        //keyTarget: keyList,
+        identify: "Target 6", // Offset(330.0, 192.0)),
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(400, 300), Offset(0.0, 185.0)),
+        targetPosition: TargetPosition(Size(400, 80), Offset(0.0, 165.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -438,20 +530,8 @@ class _MainViewState extends State<MainView> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 50.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Toque en cualquier parte para continuar.",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
                     Text(
-                      "Lista de requerimientos",
+                      "Acción pendiente",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepPurpleAccent,
@@ -459,66 +539,112 @@ class _MainViewState extends State<MainView> {
                     ),
                     Container(
                       padding: EdgeInsets.all(10),
-                      //color: Colors.deepPurpleAccent,
-                      //height: 200,
-                      child: Column(
+                      //color: Colors.grey,
+                      height: 200,
+                      width: 400,
+                      child: Table(
+                        border: TableBorder.all(color: Colors.white12),
+                        columnWidths: {
+                          0: FlexColumnWidth(10),
+                          1: FlexColumnWidth(90)
+                        },
                         children: [
-                          RichText(
-                            textAlign: TextAlign.justify,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text:
-                                      "Lista de requerimientos filtrados, por defecto se encuentra establecido en requerimientos pendientes.",
-                                ),
-                              ],
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.pause,
+                                    color: Colors.orange,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ]));
-    targets.add(TargetFocus(
-        identify: "Target 6",
-        targetPosition: TargetPosition(Size(40, 40), Offset(330.0, 192.0)),
-        alignSkip: AlignmentGeometry.lerp(
-            Alignment.bottomRight, Alignment.center, 0.0),
-        enableOverlayTab: true,
-        contents: [
-          TargetContent(
-              align: ContentAlign.left,
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Envíar requerimiento",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurpleAccent,
-                          fontSize: 20.0),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      //color: Colors.deepPurpleAccent,
-                      //height: 200,
-                      child: Column(
-                        children: [
-                          RichText(
-                            textAlign: TextAlign.justify,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text:
-                                      "Presione para enviar el requerimiento seleccionado, eso lo llevará a la siguiente etapa de creación del llavero.",
-                                ),
-                              ],
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Acción en espera',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ]),
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.stop,
+                                    color: Colors.red,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Cancelar acción seleccionada',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.skip_next,
+                                    color: Colors.green,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Enviar acción seleccionada',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
                         ],
                       ),
                     ),
@@ -540,53 +666,8 @@ class _MainViewState extends State<MainView> {
         ]));
     targets.add(TargetFocus(
         identify: "Target 7",
-        //keyTarget: keyActionButton,
-        targetPosition: TargetPosition(Size(40, 40), Offset(255.0, 192.0)),
-        alignSkip: AlignmentGeometry.lerp(
-            Alignment.bottomRight, Alignment.center, 0.0),
-        enableOverlayTab: true,
-        contents: [
-          TargetContent(
-              align: ContentAlign.bottom,
-              child: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Cancelar requerimiento",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurpleAccent,
-                          fontSize: 20.0),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "Presione para cancelar el requerimiento seleccionado. Se enviará la notificación al servidor como cancelada.",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 100.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Toque en cualquier parte para continuar.",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )),
-        ]));
-    targets.add(TargetFocus(
-        identify: "Target 8",
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(150, 45), Offset(90.0, 190.0)),
+        targetPosition: TargetPosition(Size(160, 45), Offset(80.0, 185.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -599,7 +680,7 @@ class _MainViewState extends State<MainView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "Información del requerimiento",
+                      "Información de la acción",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepPurpleAccent,
@@ -608,7 +689,7 @@ class _MainViewState extends State<MainView> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Text(
-                        "Id, Categoría, Cliente y tiempo recorrido desde asignación.",
+                        "Id, Categoría, Ip y tiempo recorrido desde asignación.",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -673,7 +754,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "A continuación verá la ventana de llaves registradas...",
+                                      "A continuación verá la pantalla de llaves registradas...",
                                 ),
                               ],
                             ),
@@ -739,7 +820,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "Administre las llaves registradas desde esta ventana.",
+                                      "Administre las llaves registradas desde esta pantalla.",
                                 ),
                               ],
                             ),
@@ -1046,7 +1127,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "A continuación verá la ventana de categorías registradas...",
+                                      "A continuación verá la pantalla de categorías registradas...",
                                 ),
                               ],
                             ),
@@ -1112,7 +1193,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "Administre las categorías registradas desde esta ventana.",
+                                      "Administre las categorías registradas desde esta pantalla.",
                                 ),
                               ],
                             ),
@@ -1171,7 +1252,7 @@ class _MainViewState extends State<MainView> {
                               children: [
                                 TextSpan(
                                   text:
-                                  "Seleccione la categoría para ver la información relacionada.",
+                                      "Seleccione la categoría para ver la información relacionada.",
                                 ),
                               ],
                             ),
@@ -1197,7 +1278,7 @@ class _MainViewState extends State<MainView> {
         ]));
     targets.add(TargetFocus(
         identify: "Target 3",
-        targetPosition: TargetPosition(Size(25, 25), Offset(285.0, 233.0)),
+        targetPosition: TargetPosition(Size(25, 25), Offset(295.0, 233.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -1327,13 +1408,16 @@ class _MainViewState extends State<MainView> {
 
   void changePage(int? index) {
     final counter = Provider.of<CounterProvider>(context, listen: false);
+    if (_controller.isOpened == true) {
+      _controller.hide();
+    }
     setState(() {
-      currentIndex = index!;
-      switch (currentIndex) {
+      _currentIndex = index!;
+      switch (_currentIndex) {
         case 0:
           {
+            _status ? _title = 'Acciones en espera...' : _title = 'Historial';
             _icon = Icon(Icons.refresh);
-            _status ? _title = 'Requerimientos' : _title = 'Historial';
             setTutorial();
             _showBadge = true;
           }
@@ -1375,26 +1459,28 @@ class _MainViewState extends State<MainView> {
           break;
       }
     });
-    print(currentIndex);
+    print(_currentIndex);
   }
 
   @override
   Widget build(BuildContext context) {
-    final WeSlideController _controller = WeSlideController();
+    final request = Provider.of<APIService>(context);
     final double _panelMinSize = 60.0;
     final double _panelMaxSize = MediaQuery.of(context).size.height;
     final GlobalKey<ScaffoldMessengerState> messengerKey =
         new GlobalKey<ScaffoldMessengerState>();
-    final request = Provider.of<APIService>(context);
+
     final _kTabPages = <Widget>[
-      UserRequestList(
-        key: keyList,
-        iconColor: _colors.iconsColor(context),
-        shadowColor: _colors.shadowColor(context),
-        textColor: _colors.textColor(context),
-        status: _status,
-        demoMode: _demoMode,
-      ),
+      (_status == true)
+          ? UserRequestList(
+              key: keyList,
+              status: _status,
+              demoMode: _demoMode,
+            )
+          : QueryData(
+              demoMode: true,
+              status: true,
+            ),
       RegisteredKeycodesPage(
         key: keyCodeRegList,
         iconsColor: _colors.iconsColor(context),
@@ -1406,7 +1492,7 @@ class _MainViewState extends State<MainView> {
         shadowColor: _colors.shadowColor(context),
         textColor: _colors.textColor(context),
       ),
-      OptionsPage()
+      AboutPage()
     ];
 
     return NeumorphicTheme(
@@ -1430,10 +1516,10 @@ class _MainViewState extends State<MainView> {
         intensity: 5,
       ),
       child: Scaffold(
+        //backgroundColor: _colors.contextColor(context),
         appBar: NeumorphicAppBar(
           leading: GestureDetector(
-            key: keyLogo,
-            onTap: () {
+            onTap: () async {
               if (_controller.isOpened == true) {
                 _controller.hide();
               } else {
@@ -1441,18 +1527,32 @@ class _MainViewState extends State<MainView> {
               }
             },
             child: Container(
-              padding: EdgeInsets.all(5),
-              child: NeumorphicIcon(
-                QuanticLogo.logon,
-                size: 50,
-                style: NeumorphicStyle(
-                    color: _colors.iconsColor(context),
-                    shape: NeumorphicShape.flat,
-                    boxShape:
-                        NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                    shadowLightColor: _colors.shadowColor(context),
-                    depth: 1.5,
-                    intensity: 3),
+              key: keyLogo,
+              width: 50,
+              height: 50,
+              //color: Colors.lightBlue,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  NeumorphicIcon(
+                    QuanticLogo.logon,
+                    size: 48,
+                    style: NeumorphicStyle(
+                        color: Colors.redAccent,
+                        shadowLightColor: Colors.red,
+                        depth: 1,
+                        intensity: 0.7),
+                  ),
+                  NeumorphicIcon(
+                    Icons.person_pin,
+                    size: 14,
+                    style: NeumorphicStyle(
+                        color: _colors.textColor(context),
+                        shadowLightColor: _colors.shadowTextColor(context),
+                        depth: 1,
+                        intensity: 0.7),
+                  ),
+                ],
               ),
             ),
           ),
@@ -1465,7 +1565,7 @@ class _MainViewState extends State<MainView> {
                 style: NeumorphicStyle(
                   color: _colors.iconsColor(context),
                   intensity: 0.7,
-                  depth: 1.5,
+                  depth: 1,
                   shadowLightColor: _colors.shadowColor(context),
                 ),
                 textStyle: NeumorphicTextStyle(
@@ -1478,76 +1578,76 @@ class _MainViewState extends State<MainView> {
           actions: <Widget>[
             GestureDetector(
               onTap: () {
-                FormHelper.showMessage(
-                  context,
-                  "QBayes Step Up!",
-                  "¿Ver tutorial de la sección?",
-                  "Si",
-                  () {
-                    if (_controller.isOpened == true) {
-                      _controller.hide();
-                    }
-                    final counter =
-                        Provider.of<CounterProvider>(context, listen: false);
-                    if (currentIndex == 0) {
-                      showTutorial();
-                      setState(() => _demoMode = true);
+                if (_currentIndex == 3) {
+                  EasyLoading.showInfo(
+                      'No hay tutoriales disponibles para esta sección.',
+                      maskType: EasyLoadingMaskType.custom,
+                      duration: Duration(milliseconds: 3000),
+                      dismissOnTap: true);
+                } else {
+                  FormHelper.showMessage(
+                    context,
+                    "QBayes NOC",
+                    "¿Ver tutorial de la sección?",
+                    "Si",
+                    () {
+                      if (_controller.isOpened == true) {
+                        _controller.hide();
+                      }
+                      final counter =
+                          Provider.of<CounterProvider>(context, listen: false);
+                      if (_currentIndex == 0) {
+                        showTutorial();
+                        setState(() => _demoMode = true);
+                        Navigator.of(context).pop();
+                      }
+
+                      if (_currentIndex == 1) {
+                        if (counter.counter > 0) {
+                          showTutorial();
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.of(context).pop();
+                          EasyLoading.showError(
+                              'Se requieren llaves registradas para mostrar el tutorial.',
+                              maskType: EasyLoadingMaskType.custom,
+                              duration: Duration(milliseconds: 1000));
+                        }
+                      }
+
+                      if (_currentIndex == 2) {
+                        if (counter.countCats > 0) {
+                          showTutorial();
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.of(context).pop();
+                          EasyLoading.showError(
+                              'Se requieren categorías registradas para mostrar el tutorial.',
+                              maskType: EasyLoadingMaskType.custom,
+                              duration: Duration(milliseconds: 1000));
+                        }
+                      }
+                    },
+                    buttonText2: "No",
+                    isConfirmationDialog: true,
+                    onPressed2: () {
+                      setState(() => _demoMode = false);
                       Navigator.of(context).pop();
-                    }
-
-                    if (currentIndex == 1) {
-                      if (counter.counter > 0) {
-                        showTutorial();
-                        Navigator.of(context).pop();
-                      } else {
-                        Navigator.of(context).pop();
-                        EasyLoading.showError(
-                            'Se requieren llaves registradas para mostrar el tutorial.',
-                            maskType: EasyLoadingMaskType.custom,
-                            duration: Duration(milliseconds: 1000));
-                      }
-                    }
-
-                    if (currentIndex == 2) {
-                      if (counter.countCats > 0) {
-                        showTutorial();
-                        Navigator.of(context).pop();
-                      } else {
-                        Navigator.of(context).pop();
-                        EasyLoading.showError(
-                            'Se requieren categorías registradas para mostrar el tutorial.',
-                            maskType: EasyLoadingMaskType.custom,
-                            duration: Duration(milliseconds: 1000));
-                      }
-                    }
-                  },
-                  buttonText2: "No",
-                  isConfirmationDialog: true,
-                  onPressed2: () {
-                    setState(() => _demoMode = false);
-                    Navigator.of(context).pop();
-                  },
-                );
+                    },
+                  );
+                }
               },
-              child: Stack(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    child: NeumorphicIcon(
-                      Icons.help_outline,
-                      key: keyHelp,
-                      size: 40,
-                      style: NeumorphicStyle(
-                          color: _colors.iconsColor(context),
-                          shape: NeumorphicShape.flat,
-                          boxShape: NeumorphicBoxShape.roundRect(
-                              BorderRadius.circular(10)),
-                          shadowLightColor: _colors.shadowColor(context),
-                          depth: 1.5,
-                          intensity: 0.7),
-                    ),
-                  ),
-                ],
+              child: NeumorphicIcon(
+                Icons.help_outline,
+                size: 40,
+                style: NeumorphicStyle(
+                    color: _colors.iconsColor(context),
+                    shape: NeumorphicShape.flat,
+                    boxShape:
+                        NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
+                    shadowLightColor: _colors.shadowColor(context),
+                    depth: 1,
+                    intensity: 0.7),
               ),
             ),
           ],
@@ -1564,47 +1664,165 @@ class _MainViewState extends State<MainView> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    Container(
-                      height: 50,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      padding: EdgeInsets.only(right: 15),
-                      child: Row(
-                        children: [
-                          Container(
-                            color: Colors.deepPurple,
-                            width: MediaQuery.of(context).size.width * 0.9,
+                    _showBadge == true
+                        ? Container(
+                            height: 50,
+                            color: _colors.contextColor(context),
+                            padding: EdgeInsets.all(1),
+                            child: Row(
+                              key: keyFilter,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                NeumorphicRadio(
+                                  child: SizedBox(
+                                    height: 40,
+                                    width: 180,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          NeumorphicIcon(
+                                            Icons.pause,
+                                            size: 40,
+                                            style: NeumorphicStyle(
+                                                color: _groupValue == 1
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context),
+                                                shape: NeumorphicShape.flat,
+                                                boxShape: NeumorphicBoxShape
+                                                    .roundRect(
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                shadowLightColor: _groupValue ==
+                                                        1
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context),
+                                                depth: 1,
+                                                intensity: 0.7),
+                                          ),
+                                          Text(
+                                            "En espera...",
+                                            style: TextStyle(
+                                                color: _groupValue == 1
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  value: 1,
+                                  groupValue: _groupValue,
+                                  style: NeumorphicRadioStyle(
+                                      intensity: 0.5,
+                                      selectedDepth: 1,
+                                      unselectedDepth: 1.5,
+                                      selectedColor:
+                                          _colors.contextColor(context),
+                                      unselectedColor:
+                                          _colors.contextColor(context)),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      request.selectedStatus = "2";
+                                      _status = true;
+                                      _groupValue = 1;
+                                    });
+                                  },
+                                ),
+                                SizedBox(width: 26),
+                                NeumorphicRadio(
+                                  child: SizedBox(
+                                    height: 40,
+                                    width: 180,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          NeumorphicIcon(
+                                            Icons.history,
+                                            size: 40,
+                                            style: NeumorphicStyle(
+                                                color: _groupValue == 2
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context),
+                                                shape: NeumorphicShape.flat,
+                                                boxShape: NeumorphicBoxShape
+                                                    .roundRect(
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                shadowLightColor: _groupValue ==
+                                                        2
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context),
+                                                depth: 1,
+                                                intensity: 0.7),
+                                          ),
+                                          Text(
+                                            "Historial",
+                                            style: TextStyle(
+                                                color: _groupValue == 2
+                                                    ? Colors.orange
+                                                    : _colors
+                                                        .borderColor(context)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  value: 2,
+                                  groupValue: _groupValue,
+                                  style: NeumorphicRadioStyle(
+                                      intensity: 0.5,
+                                      selectedDepth: 1,
+                                      unselectedDepth: 1.5,
+                                      selectedColor:
+                                          _colors.contextColor(context),
+                                      unselectedColor:
+                                          _colors.contextColor(context)),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _status = false;
+                                      _groupValue = 2;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            height: 40,
+                            color: _colors.contextColor(context),
+                            width: MediaQuery.of(context).size.width,
                             padding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    EasyLoading.show(
-                                        status:
-                                            'Sincronizando requerimientos...',
-                                        maskType: EasyLoadingMaskType.custom);
-                                    Future.delayed(Duration(milliseconds: 1000))
-                                        .then((value) => {
-                                              if (request.selectedStatus == "1")
-                                                {
-                                                  request.selectedStatus = "2",
-                                                  _status = true,
-                                                  _title = 'Requerimientos'
-                                                }
-                                              else
-                                                {
-                                                  request.selectedStatus = "1",
-                                                  _status = false,
-                                                  _title = 'Historial'
-                                                },
-                                              EasyLoading.dismiss()
-                                            });
+                                    setState(() {
+                                      _status = !_status;
+                                      if (_status == true) {
+                                        request.selectedStatus = "2";
+                                      }
+                                      _status
+                                          ? _title = 'Acciones en espera...'
+                                          : _title = 'Historial';
+                                    });
                                   },
                                   child: Visibility(
                                     key: keyFilter,
                                     visible: _showBadge,
                                     child: NeumorphicIcon(
-                                      Icons.wifi_protected_setup,
+                                      _status == true
+                                          ? Icons.pause
+                                          : Icons.query_builder,
                                       size: 35,
                                       style: NeumorphicStyle(
                                           color: Colors.orange,
@@ -1613,7 +1831,7 @@ class _MainViewState extends State<MainView> {
                                               NeumorphicBoxShape.roundRect(
                                                   BorderRadius.circular(10)),
                                           shadowLightColor: Colors.deepPurple,
-                                          depth: 1.5,
+                                          depth: 1,
                                           intensity: 0.7),
                                     ),
                                   ),
@@ -1626,7 +1844,7 @@ class _MainViewState extends State<MainView> {
                                     children: [
                                       Visibility(
                                           visible: !_showBadge,
-                                          child: currentIndex == 1
+                                          child: _currentIndex == 1
                                               ? Consumer<CounterProvider>(
                                                   builder: (context, notifier,
                                                           child) =>
@@ -1637,7 +1855,7 @@ class _MainViewState extends State<MainView> {
                                                               color: Colors
                                                                   .orange)),
                                                 )
-                                              : currentIndex == 2
+                                              : _currentIndex == 2
                                                   ? Consumer<CounterProvider>(
                                                       builder: (context,
                                                               notifier,
@@ -1663,7 +1881,7 @@ class _MainViewState extends State<MainView> {
                                               _colors.shadowColor(context),
                                         ),
                                         textStyle: NeumorphicTextStyle(
-                                          fontSize: 15,
+                                          fontSize: 16,
                                         ),
                                       ),
                                     ],
@@ -1672,9 +1890,6 @@ class _MainViewState extends State<MainView> {
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
                     Column(
                       children: [
                         Container(
@@ -1686,7 +1901,7 @@ class _MainViewState extends State<MainView> {
                                 Container(
                                   height: MediaQuery.of(context).size.height *
                                       0.700,
-                                  child: _kTabPages[currentIndex],
+                                  child: _kTabPages[_currentIndex],
                                 ),
                               ],
                             ),
@@ -1701,7 +1916,7 @@ class _MainViewState extends State<MainView> {
             panel: UserInfo()),
         floatingActionButton: Badge(
           showBadge: _showBadge ? true : false,
-          badgeContent: (request != null)
+          badgeContent: (request.count > 0)
               ? Text('${request.count}', style: TextStyle(color: Colors.white))
               : Text('0'),
           badgeColor: Colors.orange,
@@ -1709,34 +1924,34 @@ class _MainViewState extends State<MainView> {
           child: FloatingActionButton(
             key: keyActionButton,
             onPressed: () {
-              switch (currentIndex) {
+              switch (_currentIndex) {
                 case 0:
                   {
+                    if (_status == false) {
+                      //getCsv(request.request!);
+                      print('Estado: $_status');
+                    } else {
+                      EasyLoading.show(
+                          status: 'Sincronizando acciones...',
+                          maskType: EasyLoadingMaskType.custom);
+                      Future.delayed(Duration(milliseconds: 2000))
+                          .then((value) => {
+                                setState(() {
+                                  request.selectedStatus = "2";
+                                  _status = true;
+                                  _title = 'Acciones';
+                                }),
+                                EasyLoading.dismiss()
+                              });
+                    }
                     if (_controller.isOpened == true) {
                       _controller.hide();
                     }
-                    EasyLoading.show(
-                        status: 'Sincronizando requerimientos...',
-                        maskType: EasyLoadingMaskType.custom);
-                    Future.delayed(Duration(milliseconds: 3000))
-                        .then((value) => {
-                              setState(() {
-                                request.selectedStatus = "2";
-                                _status = true;
-                                _title = 'Requerimientos';
-                              }),
-                              EasyLoading.dismiss()
-                            });
-
-                    final snackBar = SnackBar(
-                      content: Text('Requerimientos sincronizados.'),
-                    );
-                    messengerKey.currentState?.showSnackBar(snackBar);
                   }
                   break;
                 case 1:
                   {
-                    Navigator.push(context, MaterialPageRoute<String>(
+                    Navigator.push(context, MaterialPageRoute<Keycode>(
                       builder: (BuildContext context) {
                         return AddEditKeycodePage(
                           isCreateMode: true,
@@ -1746,11 +1961,9 @@ class _MainViewState extends State<MainView> {
                       },
                     )).then((result) {
                       if (result != null) {
-                        if (result != '') {
-                          setState(() {
-                            super.widget;
-                          });
-                        }
+                        setState(() {
+                          super.widget;
+                        });
                         print('Devuelve');
                       }
                     });
@@ -1758,7 +1971,7 @@ class _MainViewState extends State<MainView> {
                   break;
                 case 2:
                   {
-                    Navigator.push(context, MaterialPageRoute<bool>(
+                    Navigator.push(context, MaterialPageRoute(
                       builder: (BuildContext context) {
                         return AddEditCategoryPage();
                       },
@@ -1781,11 +1994,12 @@ class _MainViewState extends State<MainView> {
           hasNotch: true,
           fabLocation: BubbleBottomBarFabLocation.end,
           opacity: .2,
-          currentIndex: currentIndex,
+          currentIndex: _currentIndex,
           onTap: changePage,
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(25),
-          ), //border radius doesn't work when the notch is enabled.
+          ),
+          //border radius doesn't work when the notch is enabled.
           elevation: 8,
           hasInk: true,
           inkColor: Colors.black12,
@@ -1794,14 +2008,14 @@ class _MainViewState extends State<MainView> {
             BubbleBottomBarItem(
               backgroundColor: Colors.red,
               icon: Icon(
-                Icons.home,
+                Icons.notification_important,
                 color: _colors.iconsColor(context),
               ),
               activeIcon: Icon(
-                Icons.home,
+                Icons.notification_important,
                 color: Colors.red,
               ),
-              title: Text("Inicio"),
+              title: Text("Acciones"),
             ),
             BubbleBottomBarItem(
                 backgroundColor: Colors.deepPurpleAccent,
@@ -1828,14 +2042,14 @@ class _MainViewState extends State<MainView> {
             BubbleBottomBarItem(
                 backgroundColor: Colors.green,
                 icon: Icon(
-                  Icons.menu,
-                  color: Colors.deepPurpleAccent,
+                  Icons.info,
+                  color: _colors.iconsColor(context),
                 ),
                 activeIcon: Icon(
-                  Icons.menu,
+                  Icons.info,
                   color: Colors.green,
                 ),
-                title: Text("Menú"))
+                title: Text("Acerca"))
           ],
         ),
       ),

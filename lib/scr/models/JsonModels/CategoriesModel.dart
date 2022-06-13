@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:digitalkeyholder/scr/models/model.dart';
+import 'package:digitalkeyholder/scr/models/Model.dart';
 
 List<Categories> listCategoriesFromJson(String str) =>
     List<Categories>.from(json.decode(str).map((x) {

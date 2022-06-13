@@ -1,34 +1,31 @@
 import 'dart:convert';
-import 'package:badges/badges.dart';
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
+import 'package:digitalkeyholder/scr/icon/quantic_logo_icons.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/screens/Progress.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/AddEditKeycode_Page.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/KeycodeDetails_Page.dart';
+import 'package:digitalkeyholder/scr/screens/progress.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/add_edit_keycode_page.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/dataviews/keycode_details_page.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
-import 'package:digitalkeyholder/testing/api_service.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:digitalkeyholder/scr/services/api_service.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
-
 class KeyringBuilder extends StatefulWidget {
   const KeyringBuilder({
     Key? key,
     this.isAutoMode,
-    this.mapedCategories,
+    this.mappedCategories,
     required this.keyringIndex,
     required this.client,
   }) : super(key: key);
   final int? keyringIndex;
   final String? client;
-  final mapedCategories;
+  final mappedCategories;
   final bool? isAutoMode;
   @override
   _KeyringBuilderState createState() => _KeyringBuilderState();
@@ -71,9 +68,9 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
     dbService = new DBService();
 
     _foundCategories = <Keycode>[];
-    if (widget.mapedCategories != null) {
-      print(widget.mapedCategories);
-      _categoriesFromJson = new Categories.fromJson(widget.mapedCategories);
+    if (widget.mappedCategories != null) {
+      print(widget.mappedCategories);
+      _categoriesFromJson = new Categories.fromJson(widget.mappedCategories);
     }
     if (widget.isAutoMode == true) {
       setJson(_categoriesFromJson!);
@@ -107,7 +104,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                       ),
                     ),
                     Text(
-                      "Completar requerimiento",
+                      "Completar acción",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.cyanAccent,
@@ -116,7 +113,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Text(
-                        "En esta sección se procederá a realizar la recopilación de las llaves registradas para posteriormente realizar el envío. Este tutorial lo guiará a travéz de todo el proceso. Para volver a visualizar este tutorial, presione sobre el icono señalado.",
+                        "En esta sección se procederá a realizar la recopilación de las llaves registradas para posteriormente realizar el envío. Este tutorial lo guiará a travéz de todo el proceso. Para volver a visualizarlo, presione sobre el icono señalado.",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -140,7 +137,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
         identify: "Target 1",
         //keyTarget: keyList,
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(400, 240), Offset(0.0, 130.0)),
+        targetPosition: TargetPosition(Size(400, 240), Offset(0.0, 175.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -256,8 +253,126 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
         ]));
     targets.add(TargetFocus(
         identify: "Target 2",
+        //keyTarget: keyList,
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(150, 35), Offset(90.0, 150.0)),
+        targetPosition: TargetPosition(Size(400, 20), Offset(0.0, 130.0)),
+        alignSkip: AlignmentGeometry.lerp(
+            Alignment.bottomRight, Alignment.center, 0.0),
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+              align: ContentAlign.bottom,
+              child: Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Estado de la acción",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurpleAccent,
+                          fontSize: 20.0),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      //color: Colors.grey,
+                      height: 200,
+                      width: 400,
+                      child: Table(
+                        border: TableBorder.all(color: Colors.white12),
+                        columnWidths: {
+                          0: FlexColumnWidth(10),
+                          1: FlexColumnWidth(90)
+                        },
+                        children: [
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.skip_next,
+                                    color: Colors.green,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Acción disponible para envíar',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                          TableRow(children: [
+                            Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.pause,
+                                    color: Colors.redAccent,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Acción incompleta',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 100.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Toque en cualquier parte para continuar.",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ]));
+    targets.add(TargetFocus(
+        identify: "Target 3",
+        shape: ShapeLightFocus.RRect,
+        targetPosition: TargetPosition(Size(150, 35), Offset(90.0, 200.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -300,9 +415,9 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 3",
+        identify: "Target 4",
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(350, 60), Offset(20.0, 135.0)),
+        targetPosition: TargetPosition(Size(350, 60), Offset(20.0, 190.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -378,7 +493,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                                 ),
                                 TextSpan(
                                   text:
-                                      "Siempre que se cree o edite una llave, el requerimiento se refrescará de forma automática.",
+                                      "Siempre que se cree o edite una llave, la acción se refrescará de forma automática.",
                                 ),
                                 WidgetSpan(
                                   child: Icon(
@@ -410,9 +525,9 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 4",
+        identify: "Target 5",
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(400, 100), Offset(0.0, 600.0)),
+        targetPosition: TargetPosition(Size(400, 100), Offset(0.0, 580.0)),
         alignSkip: AlignmentGeometry.lerp(
             Alignment.bottomRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -446,7 +561,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Text(
-                        "Información detallada del requerimiento.",
+                        "Información detallada de la acción.",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -455,7 +570,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 5",
+        identify: "Target 6",
         shape: ShapeLightFocus.RRect,
         keyTarget: keyActionButton,
         alignSkip:
@@ -555,7 +670,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Enviar requerimiento completado',
+                                    'Enviar acción completada',
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
@@ -574,7 +689,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 6",
+        identify: "Target 7",
         shape: ShapeLightFocus.RRect,
         keyTarget: keyCancel,
         alignSkip:
@@ -601,7 +716,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                       ),
                     ),
                     Text(
-                      "Cancelar tarea",
+                      "Volver atrás",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.redAccent,
@@ -610,7 +725,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Text(
-                        "Se cancelará el envío del llavero, no se perderá ningún cambio guardado podrá enviarlo más adelante.",
+                        "Regresa a la pantalla anterior, no se cancelará el envío del llavero y no se perderá ningún cambio guardado, podrá enviarlo más adelante.",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -619,7 +734,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 1",
+        identify: "Target 8",
         keyTarget: keyMessage,
         enableOverlayTab: true,
         shape: ShapeLightFocus.RRect,
@@ -665,7 +780,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "Muestra una descripción del estado actual del requerimiento teniendo en cuenta las llaves solicitadas contra las llaves encontradas.\n\n",
+                                      "Muestra una descripción del estado actual de la acción teniendo en cuenta las llaves solicitadas contra las llaves encontradas.\n\n",
                                 ),
                                 TextSpan(
                                   text:
@@ -688,7 +803,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
     targets.add(TargetFocus(
         identify: "Target 0",
         shape: ShapeLightFocus.RRect,
-        targetPosition: TargetPosition(Size(400, 100), Offset(0.0, 600.0)),
+        targetPosition: TargetPosition(Size(400, 100), Offset(0.0, 580.0)),
         alignSkip:
             AlignmentGeometry.lerp(Alignment.topRight, Alignment.center, 0.0),
         enableOverlayTab: true,
@@ -747,7 +862,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                                 )),
                                 TextSpan(
                                   text:
-                                      "...O bien puede cancelar de momento y envíar más adelante.",
+                                      "...o bien puede cancelar de momento y envíar más adelante.",
                                 ),
                               ],
                             ),
@@ -760,7 +875,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               )),
         ]));
     targets.add(TargetFocus(
-        identify: "Target 5",
+        identify: "Target 1",
         shape: ShapeLightFocus.RRect,
         keyTarget: keyActionButton,
         alignSkip:
@@ -811,7 +926,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
         targets: targets, // List<TargetFocus>
         colorShadow: Colors.black, // DEFAULT Colors.black
         // alignSkip: Alignment.bottomRight,
-        textSkip: "Saltar",
+        textSkip: "Omitir",
         // paddingFocus: 10,
         // focusAnimationDuration: Duration(milliseconds: 500),
         // pulseAnimationDuration: Duration(milliseconds: 500),
@@ -820,7 +935,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
       print(target);
       print('Presionado');
     }, onSkip: () {
-      EasyLoading.showInfo('Tutorial cancelado por el usuario.',
+      EasyLoading.showInfo('Tutorial omitido por el usuario.',
           maskType: EasyLoadingMaskType.custom,
           duration: Duration(milliseconds: 1000));
     })
@@ -846,7 +961,6 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
 
   Future setJson(Categories categories) async {
     _actionId = categories.actionId;
-
     var index = 0;
     _notFound = 0;
     _requestCategories = categories.categories;
@@ -897,9 +1011,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
 
     if (_notFound > 0) {
       _title = 'Llaves faltantes...';
-
-
-
+      _status = false;
       EasyLoading.showError('Por favor registre las llaves faltantes',
           maskType: EasyLoadingMaskType.custom,
           duration: Duration(milliseconds: 1000));
@@ -920,9 +1032,8 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
       print('Llaves ingresadas $_found');
       _jsonCategories = jsonEncode(_categoriesToJson);
 
-
       print('Llavero disponible');
-      if (prefs.firstSend == true){
+      if (prefs.firstSend == true) {
         setRequest();
         showTutorial();
         prefs.firstSend = false;
@@ -968,20 +1079,35 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
       child: Scaffold(
         appBar: NeumorphicAppBar(
           leading: Container(
-            padding: EdgeInsets.all(8),
-            child: NeumorphicIcon(
-              Icons.pause,
-              size: 40,
-              style: NeumorphicStyle(
-                  color: Colors.deepPurpleAccent,
-                  shape: NeumorphicShape.flat,
-                  boxShape:
-                      NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
-                  shadowLightColor: Colors.deepPurple,
-                  depth: 1.5,
-                  intensity: 0.7),
-            ),
-          ),
+              padding: EdgeInsets.all(8),
+              child: Container(
+                width: 55,
+                height: 55,
+                //color: Colors.lightBlue,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    NeumorphicIcon(
+                      QuanticLogo.logon,
+                      size: 45,
+                      style: NeumorphicStyle(
+                          color: Colors.redAccent,
+                          shadowLightColor: Colors.red,
+                          depth: 1,
+                          intensity: 0.7),
+                    ),
+                    NeumorphicIcon(
+                      Icons.skip_next,
+                      size: 15,
+                      style: NeumorphicStyle(
+                          color: Colors.lightBlueAccent,
+                          shadowLightColor: Colors.lightBlueAccent,
+                          depth: 1,
+                          intensity: 0.7),
+                    ),
+                  ],
+                ),
+              )),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1006,7 +1132,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
               onTap: () {
                 FormHelper.showMessage(
                   context,
-                  "QBayes Step Up!",
+                  "QBayes NOC",
                   "¿Ver tutorial de la sección?",
                   "Si",
                   () {
@@ -1045,10 +1171,84 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
             child: Column(
               children: [
                 Container(
+                  height: 50,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  padding: EdgeInsets.only(right: 15),
+                  child: Row(
+                    children: [
+                      Container(
+                        color: Colors.deepPurple,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        padding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            _status == true
+                                ? GestureDetector(
+                                    onTap: () {
+                                      setRequest();
+                                      showTutorial();
+                                    },
+                                    child: NeumorphicIcon(
+                                      Icons.skip_next,
+                                      size: 35,
+                                      style: NeumorphicStyle(
+                                          color: Colors.green,
+                                          shape: NeumorphicShape.flat,
+                                          boxShape:
+                                              NeumorphicBoxShape.roundRect(
+                                                  BorderRadius.circular(10)),
+                                          shadowLightColor: Colors.deepPurple,
+                                          depth: 1.5,
+                                          intensity: 0.7),
+                                    ),
+                                  )
+                                : NeumorphicIcon(
+                                    Icons.pause,
+                                    size: 35,
+                                    style: NeumorphicStyle(
+                                        color: _status == false
+                                            ? Colors.redAccent
+                                            : Colors.green,
+                                        shape: NeumorphicShape.flat,
+                                        boxShape: NeumorphicBoxShape.roundRect(
+                                            BorderRadius.circular(10)),
+                                        shadowLightColor: Colors.deepPurple,
+                                        depth: 1.5,
+                                        intensity: 0.7),
+                                  ),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  NeumorphicText(
+                                    ' $_title',
+                                    style: NeumorphicStyle(
+                                      color: _colors.iconsColor(context),
+                                      intensity: 0.7,
+                                      depth: 1.5,
+                                      shadowLightColor:
+                                          _colors.shadowColor(context),
+                                    ),
+                                    textStyle: NeumorphicTextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
                   //color: Colors.deepPurpleAccent,
                   padding: EdgeInsets.all(10),
                   //color: Colors.lightBlueAccent,
-                  height: MediaQuery.of(context).size.height * 0.60,
+                  height: MediaQuery.of(context).size.height * 0.50,
                   width: MediaQuery.of(context).size.width,
                   child: ListView.builder(
                       itemCount: _foundCategories!.length,
@@ -1213,22 +1413,6 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(top: 25),
-                  child: NeumorphicText(
-                    _title,
-                    key: keyMessage,
-                    style: NeumorphicStyle(
-                      color: _colors.iconsColor(context),
-                      intensity: 0.7,
-                      depth: 1.5,
-                      shadowLightColor: _colors.shadowColor(context),
-                    ),
-                    textStyle: NeumorphicTextStyle(
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -1247,7 +1431,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     boxShape:
                         NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
                     shadowLightColor: _colors.shadowColor(context),
-                    depth: 3,
+                    depth: 2,
                     intensity: 3),
                 tooltip: langWords.cancel,
                 child: Container(
@@ -1270,7 +1454,7 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
                     boxShape:
                         NeumorphicBoxShape.roundRect(BorderRadius.circular(10)),
                     shadowLightColor: _colors.shadowColor(context),
-                    depth: 3,
+                    depth: 2,
                     intensity: 3),
                 tooltip: 'Enviar llavero',
                 child: Container(
@@ -1409,28 +1593,4 @@ class _KeyringBuilderState extends State<KeyringBuilder> {
       ),
     );
   }
-
-  Widget _buildButton({VoidCallback? onTap, required String text, Color? color}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: MaterialButton(
-        color: color,
-        minWidth: double.infinity,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        onPressed: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15.0),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
 }

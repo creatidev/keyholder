@@ -2,13 +2,14 @@ import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/themes.dart';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/screens/widgets/PasswordField.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/add_edit_category_page.dart';
+import 'package:digitalkeyholder/scr/screens/widgets/password_field.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -26,7 +27,7 @@ class AddEditKeycodePage extends StatefulWidget {
   final Keycode? keycodeModel;
   final bool? isCreateMode;
   final bool? isEditMode;
- final bool? isAutoMode;
+  final bool? isAutoMode;
   final int? actId;
   @override
   _AddEditKeycodePageState createState() => _AddEditKeycodePageState();
@@ -72,7 +73,7 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
         targets: targets, // List<TargetFocus>
         colorShadow: Colors.black, // DEFAULT Colors.black
         // alignSkip: Alignment.bottomRight,
-        textSkip: "Saltar",
+        textSkip: "Omitir",
         // paddingFocus: 10,
         // focusAnimationDuration: Duration(milliseconds: 500),
         // pulseAnimationDuration: Duration(milliseconds: 500),
@@ -83,7 +84,7 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
       print(target);
     }, onSkip: () {
       setState(() => _demoMode = false);
-      EasyLoading.showInfo('Tutorial cancelado por el usuario.',
+      EasyLoading.showInfo('Tutorial omitido por el usuario.',
           maskType: EasyLoadingMaskType.custom,
           duration: Duration(milliseconds: 1000));
     })
@@ -103,6 +104,7 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
 
     if (prefs.firstKey == true) {
       Future.delayed(Duration(microseconds: 200)).then((value) {
+        setTuturial();
         showTutorial();
         prefs.firstKey = false;
       });
@@ -137,10 +139,12 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
           _categoryModel!.category = _keycodeModel!.name;
         }
         if (_keycodeModel!.port != null) {
+          _port = _keycodeModel!.port;
           _keyPortController.text = _keycodeModel!.port.toString();
         }
 
         if (_keycodeModel!.instance != null) {
+          _instance = _keycodeModel!.instance!;
           _keyInstanceController.text = _keycodeModel!.instance!;
         }
 
@@ -153,14 +157,16 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
         print('Modo llavero: ${widget.isAutoMode}');
         _enableField = false;
         _categoryModel!.category = _keycodeModel!.name;
-        if (_keycodeModel!.ip != ''){
+        if (_keycodeModel!.ip != '') {
           _enableFieldIp = false;
           _keyIpAddressController.text = _keycodeModel!.ip!;
         }
-
       }
     }
+  }
 
+  void setTuturial() {
+    targets.clear();
     targets.add(TargetFocus(
         identify: "Target 0",
         keyTarget: keyHelp,
@@ -253,7 +259,7 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                               children: [
                                 TextSpan(
                                   text:
-                                      "Muestra las categorías registradas de forma automática al iniciar el requerimiento, se utilizan para filtrar su utilidad en el requerimiento.\n\n",
+                                      "Muestra las categorías registradas de forma automática al iniciar la acción, se utilizan para filtrar su utilidad en la acción.\n\n",
                                 ),
                                 TextSpan(
                                   text:
@@ -698,17 +704,34 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      "Id de requerimiento",
+                      "Id de la acción",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 20.0),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "Muestra el id del requerimiento sobre la cual la llave fue solicitada, se registra la primera vez que fue registrada.",
-                        style: TextStyle(color: Colors.white),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      //color: Colors.deepPurpleAccent,
+                      //height: 200,
+                      child: Column(
+                        children: [
+                          RichText(
+                            textAlign: TextAlign.justify,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      "Muestra el id de la acción sobre la cual la llave fue solicitada, se guarda la primera vez que fue registrada.\n\n",
+                                ),
+                                TextSpan(
+                                  text:
+                                      "Si el ingreso no es a través de una acción, se registrará como manual.",
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -727,7 +750,6 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                 ),
               )),
         ]));
-
   }
 
   @override
@@ -786,12 +808,12 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                         intensity: 0.7),
                   ),
                   Positioned(
-                    right: 5,
-                    top: 19,
+                    right: 1,
+                    top: 21,
                     child: Text(
-                      '$_actionId',
+                      (_actionId != null) ? _actionId.toString() : 'Manual',
                       style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 8,
                           fontWeight: FontWeight.w900,
                           color: _colors.contextColor(context)),
                     ),
@@ -826,18 +848,17 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
               onTap: () {
                 FormHelper.showMessage(
                   context,
-                  "QBayes Step Up!",
+                  "QBayes NOC",
                   "¿Ver tutorial de la sección?",
                   "Si",
                   () {
-                    //showTutorial();
-                    //setState(() => _demoMode = true);
+                    setTuturial();
+                    showTutorial();
                     Navigator.of(context).pop();
                   },
                   buttonText2: "No",
                   isConfirmationDialog: true,
                   onPressed2: () {
-                    //setState(() => _demoMode = false);
                     Navigator.of(context).pop();
                   },
                 );
@@ -898,46 +919,92 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<List<Categories>> snapshot) {
                               if (snapshot.hasData) {
-                                return Column(
-                                  children: [
-                                    FormBuilderDropdown<String>(
-                                      key: keyCategory,
-                                      enabled: _enableField,
-                                      name: 'category',
-                                      initialValue: _categoryModel!.category,
-                                      decoration: InputDecoration(
-                                          labelText: 'Categoría',
-                                          prefixIcon: Icon(
-                                              Icons.vpn_key_outlined,
-                                              color: Colors.deepPurpleAccent,
-                                              size: 18)),
-                                      hint: Text('Seleccionar categoría'),
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: FormBuilderValidators.compose([
-                                        FormBuilderValidators.required(context,
-                                            errorText:
-                                                langWords.requiredCategory)
-                                      ]),
-                                      items: snapshot.data!
-                                          .map((data) =>
-                                              DropdownMenuItem<String>(
-                                                child: Text(
-                                                    data.category.toString()),
-                                                value: data.category,
-                                              ))
-                                          .toList(),
-                                      onChanged: (value) {
-                                        _keyLabelController.text = value!;
-                                        _actualCategory = value;
-                                        _keycodeModel!.name = value;
-                                        _categoryModel!.category = value;
-                                      },
+                                if (snapshot.data!.length != 0) {
+                                  return Column(
+                                    children: [
+                                      FormBuilderDropdown<String>(
+                                        key: keyCategory,
+                                        enabled: _enableField,
+                                        name: 'category',
+                                        initialValue: _categoryModel!.category,
+                                        decoration: InputDecoration(
+                                            labelText: 'Categoría',
+                                            prefixIcon: Icon(
+                                                Icons.vpn_key_outlined,
+                                                color: Colors.deepPurpleAccent,
+                                                size: 18)),
+                                        hint: Text('Seleccionar categoría'),
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator:
+                                            FormBuilderValidators.compose([
+                                          FormBuilderValidators.required(
+                                              errorText:
+                                                  langWords.requiredCategory)
+                                        ]),
+                                        items: snapshot.data!
+                                            .map((data) =>
+                                                DropdownMenuItem<String>(
+                                                  child: Text(
+                                                      data.category.toString()),
+                                                  value: data.category,
+                                                ))
+                                            .toList(),
+                                        onChanged: (value) {
+                                          //_keyLabelController.text = value!;
+                                          _actualCategory = value;
+                                          _keycodeModel!.name = value;
+                                          _categoryModel!.category = value;
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return NeumorphicButton(
+                                    onPressed: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute<String>(
+                                        builder: (BuildContext context) {
+                                          return AddEditCategoryPage();
+                                        },
+                                      )).then((value) {
+                                        if (value != null) {
+                                          setState(() {
+                                            _actualCategory = value;
+                                            _keycodeModel!.name = value;
+                                            _categoryModel!.category = value;
+                                          });
+                                          super.widget;
+                                        }
+                                      });
+                                    },
+                                    tooltip: 'Recuperar contraseña',
+                                    style: NeumorphicStyle(
+                                        color: _colors.iconsColor(context),
+                                        shape: NeumorphicShape.flat,
+                                        boxShape: NeumorphicBoxShape.rect(),
+                                        shadowLightColor:
+                                            _colors.iconsColor(context),
+                                        depth: 1,
+                                        intensity: 1),
+                                    padding: const EdgeInsets.all(7.0),
+                                    child: NeumorphicText(
+                                      'Crear categoría',
+                                      style: NeumorphicStyle(
+                                        color: _colors.textButtonColor(context),
+                                        intensity: 0.7,
+                                        depth: 1,
+                                        shadowLightColor:
+                                            _colors.shadowTextColor(context),
+                                      ),
+                                      textStyle: NeumorphicTextStyle(
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ],
-                                );
+                                  );
+                                }
                               }
-                              return Center(child: Icon(Icons.hourglass_empty));
+                              return CircularProgressIndicator();
                             },
                           ),
                           FormBuilderTextField(
@@ -951,10 +1018,10 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                                     color: Colors.deepPurpleAccent, size: 18),
                                 labelText: langWords.label),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: langWords.requiredField)
                             ]),
-                            maxLength: 30,
+                            maxLength: 20,
                             onChanged: (value) {
                               _keycodeModel!.label = value;
                             },
@@ -972,9 +1039,9 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                                     color: Colors.deepPurpleAccent, size: 18),
                                 labelText: langWords.ip),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: "Este campo no puede estar vacío"),
-                              FormBuilderValidators.ip(context,
+                              FormBuilderValidators.ip(
                                   errorText:
                                       "Introduzca una dirección ip válida"),
                             ]),
@@ -994,7 +1061,7 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                                     color: Colors.deepPurpleAccent, size: 18),
                                 labelText: langWords.userName),
                             validator: FormBuilderValidators.compose([
-                              FormBuilderValidators.required(context,
+                              FormBuilderValidators.required(
                                   errorText: langWords.requiredField)
                             ]),
                             onChanged: (value) {
@@ -1006,6 +1073,8 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                             controller: _keyPassController,
                             //helperText: 'No más de 15 caracteres.',
                             labelText: langWords.hintLoginPassword,
+                            validator: FormBuilderValidators.required(
+                                errorText: langWords.requiredField),
                             onFieldChange: (value) {
                               _keycodeModel!.password = value;
                             },
@@ -1104,37 +1173,73 @@ class _AddEditKeycodePageState extends State<AddEditKeycodePage> {
                 ),
                 onPressed: () async {
                   var now = DateTime.now();
-                  _keycodeModel!.regDate =
-                      DateFormat('yyyy-MM-dd -- hh:mm a').format(now);
-                  _keycodeModel!.name = _categoryModel!.category;
-                  _keycodeModel!.port = _port;
-                  _keycodeModel!.instance = _instance;
-                  _keycodeModel!.action = _actionId;
-                  if (widget.isEditMode!) {
-                    _dbService!.updateKeycode(_keycodeModel!).then((value) {
-                      EasyLoading.showInfo('Llave actualizada correctamente',
-                          maskType: EasyLoadingMaskType.custom,
-                          duration: Duration(milliseconds: 2000));
-
-                      Navigator.pop(context, _keycodeModel!);
-                    });
+                  if (_keycodeModel!.name == null) {
+                    EasyLoading.showError(langWords.requiredCategory!,
+                        dismissOnTap: true,
+                        maskType: EasyLoadingMaskType.custom,
+                        duration: Duration(milliseconds: 1500));
                   } else {
-                    print(_keycodeModel!.name);
-                    print(_keycodeModel!.label);
-                    print(_keycodeModel!.ip);
-                    print(_keycodeModel!.user);
-                    print(_keycodeModel!.password);
-                    print(_keycodeModel!.port);
-                    print(_keycodeModel!.instance);
-                    print(_keycodeModel!.regDate);
-                    print(_keycodeModel!.action);
-                    if (_formKeyCard.currentState!.saveAndValidate()) {
-                      _dbService!.addKeycode(_keycodeModel!).then((value) {
-                        EasyLoading.showInfo('Llave registrada correctamente',
-                            maskType: EasyLoadingMaskType.custom,
-                            duration: Duration(milliseconds: 2000));
-                        Navigator.pop(context, _keycodeModel!);
+                    _keycodeModel!.regDate =
+                        DateFormat('yyyy-MM-dd -- hh:mm a').format(now);
+                    _keycodeModel!.name = _categoryModel!.category;
+                    _keycodeModel!.port = _port;
+                    _keycodeModel!.instance = _instance;
+                    _keycodeModel!.action = _actionId;
+                    if (widget.isEditMode!) {
+                      _dbService!.updateKeycode(_keycodeModel!).then((value) {
+                        if (value == true) {
+                          EasyLoading.showInfo(
+                              'Llave actualizada correctamente',
+                              maskType: EasyLoadingMaskType.custom,
+                              duration: Duration(milliseconds: 2000));
+                          Navigator.pop(context, _keycodeModel!);
+                        }
                       });
+                    } else {
+                      print(_keycodeModel!.name);
+                      print(_keycodeModel!.label);
+                      print(_keycodeModel!.ip);
+                      print(_keycodeModel!.user);
+                      print(_keycodeModel!.password);
+                      print(_keycodeModel!.port);
+                      print(_keycodeModel!.instance);
+                      print(_keycodeModel!.regDate);
+                      print(_keycodeModel!.action);
+                      if (_formKeyCard.currentState!.saveAndValidate()) {
+                        var getIp = "SELECT * FROM keycodetable WHERE name ="
+                            " '${_keycodeModel!.name}' AND ip = '${_keycodeModel!.ip}'";
+                        print(getIp);
+                        _dbService!.getKeycodeByCategory(getIp).then((value) {
+                          if (value.length == 0) {
+                            _dbService!
+                                .addKeycode(_keycodeModel!)
+                                .then((value) {
+                              EasyLoading.showInfo(
+                                  'Llave registrada correctamente',
+                                  maskType: EasyLoadingMaskType.custom,
+                                  duration: Duration(milliseconds: 2000));
+                              Navigator.pop(context, _keycodeModel!);
+                            });
+                          } else {
+                            _dbService!
+                                .updateKeycode(_keycodeModel!)
+                                .then((value) {
+                              EasyLoading.showInfo(
+                                  'Llave actualizada correctamente',
+                                  maskType: EasyLoadingMaskType.custom,
+                                  duration: Duration(milliseconds: 2000));
+                              Navigator.pop(context, _keycodeModel!);
+                            });
+/*                            FormHelper.showMessage(
+                                context,
+                                'QBayes NOC',
+                                'La llave con con categoría ${_keycodeModel!.name} dirección IP ${_keycodeModel!.ip} ya se encuentra registrada.',
+                                'Ok', () {
+                              Navigator.of(context).pop();
+                            });*/
+                          }
+                        });
+                      }
                     }
                   }
                 },

@@ -1,4 +1,4 @@
-import 'package:digitalkeyholder/scr/models/model.dart';
+import 'package:digitalkeyholder/scr/models/Model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 
@@ -43,7 +43,7 @@ abstract class DatabaseHelper {
     await db.execute('''
       CREATE TABLE $_categoryTableName(
       $columnCategoryId INTEGER PRIMARY KEY AUTOINCREMENT, 
-      $columnCategoryLabel STRING
+      $columnCategoryLabel TEXT
       )
       ''');
     //Batch batch = db.batch();
@@ -54,13 +54,13 @@ abstract class DatabaseHelper {
     await db.execute('''
       CREATE TABLE $_keycodeTableName(
       $columnKeycodeId INTEGER PRIMARY KEY AUTOINCREMENT, 
-      $columnKeycodeCategory STRING,
-      $columnKeycodeLabel STRING,
-      $columnKeycodeIpAddress STRING,
-      $columnKeycodeUserName STRING,
-      $columnKeycodeChain STRING,
-      $columnKeycodePort STRING,
-      $columnKeycodeInstace STRING,
+      $columnKeycodeCategory TEXT,
+      $columnKeycodeLabel TEXT,
+      $columnKeycodeIpAddress TEXT,
+      $columnKeycodeUserName TEXT,
+      $columnKeycodeChain TEXT,
+      $columnKeycodePort INTEGER,
+      $columnKeycodeInstace TEXT,
       $columnKeycodeRegDate STRING,
       $columnKeyLastIdAction INTEGER,
       $columnKeycodeUses INTEGER

@@ -1,12 +1,12 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/config/user_preferences.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/screens/keyholder/AddEditKeycode_Page.dart';
-import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
+import 'package:digitalkeyholder/scr/screens/keyholder/add_edit_keycode_page.dart';
+import 'package:digitalkeyholder/scr/services/theme_notifier.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
 import 'package:provider/provider.dart';
-import 'KeycodeDetails_Page.dart';
+import 'keycode_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 
@@ -36,6 +36,7 @@ class _RegisteredKeycodesPageState extends State<RegisteredKeycodesPage> {
   Keycode? keycodeModel;
   var visibleText = true;
   int keyCount = 0;
+  final prefs = new UserPreferences();
 
   Future<List<Keycode>> getRegisteredKeys() async {
     final counter = Provider.of<CounterProvider>(context);
@@ -141,27 +142,39 @@ class _RegisteredKeycodesPageState extends State<RegisteredKeycodesPage> {
                                                     color: widget.iconsColor,
                                                   ),
                                                   onPressed: () {
-                                                    keycodeModel!.id = data.id;
+                                                    if (prefs.showPassword ==
+                                                        true) {
+                                                      keycodeModel!.id =
+                                                          data.id;
 
-                                                    Navigator.push(context,
-                                                        MaterialPageRoute<
-                                                            Keycode>(
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return AddEditKeycodePage(
-                                                          keycodeModel: data,
-                                                          isCreateMode: false,
-                                                          isEditMode: true,
-                                                          isAutoMode: false,
-                                                        );
-                                                      },
-                                                    )).then((result) {
-                                                      if (result != null) {
-                                                        setState(() {
-                                                          super.widget;
-                                                        });
-                                                      }
-                                                    });
+                                                      Navigator.push(context,
+                                                          MaterialPageRoute<
+                                                              Keycode>(
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return AddEditKeycodePage(
+                                                            keycodeModel: data,
+                                                            isCreateMode: false,
+                                                            isEditMode: true,
+                                                            isAutoMode: false,
+                                                          );
+                                                        },
+                                                      )).then((result) {
+                                                        if (result != null) {
+                                                          setState(() {
+                                                            super.widget;
+                                                          });
+                                                        }
+                                                      });
+                                                    } else {
+                                                      Navigator.of(context).push(
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  KeycodeDetails(
+                                                                    keycodeModel:
+                                                                        data,
+                                                                  )));
+                                                    }
                                                   },
                                                 ),
                                                 new IconButton(
@@ -173,7 +186,7 @@ class _RegisteredKeycodesPageState extends State<RegisteredKeycodesPage> {
                                                   onPressed: () {
                                                     FormHelper.showMessage(
                                                       context,
-                                                      "QBayes Step Up!",
+                                                      "QBayes NOC",
                                                       "¿Desea eliminar esta llave?",
                                                       "Si",
                                                       () {

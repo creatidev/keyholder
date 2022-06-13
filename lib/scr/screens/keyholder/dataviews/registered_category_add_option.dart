@@ -1,12 +1,12 @@
 import 'package:digitalkeyholder/scr/config/language.dart';
 import 'package:digitalkeyholder/scr/models/JsonModels/CategoriesModel.dart';
-import 'package:digitalkeyholder/scr/services/ThemeNotifier.dart';
+import 'package:digitalkeyholder/scr/services/theme_notifier.dart';
 import 'package:digitalkeyholder/scr/services/db_service.dart';
 import 'package:digitalkeyholder/scr/services/form_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
-import 'CategoryDetails_Page.dart';
+import 'category_details_page.dart';
 
 class RegisteredCategoriesPage extends StatefulWidget {
   const RegisteredCategoriesPage(
@@ -140,7 +140,7 @@ class _RegisteredCategoriesPageState extends State<RegisteredCategoriesPage> {
                                               onPressed: () {
                                                 FormHelper.showMessage(
                                                   context,
-                                                  "QBayes Step Up!",
+                                                  "QBayes NOC",
                                                   "¿Desea eliminar esta categoría?",
                                                   "Si",
                                                   () {
